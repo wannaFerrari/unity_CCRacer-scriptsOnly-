@@ -7,3 +7,4 @@
 게임 플레이 영상(낮 트랙) : https://youtu.be/Er5L5qCk0IQ 
 게임 플레이 영상(밤 트랙) : https://youtu.be/RQhsOrtAz9g
 ```
+[![Video Label](http://img.youtube.com/vi/24h9d-GtEx0/0.jpg)](https://youtu.be/24h9d-GtEx0)
