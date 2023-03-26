@@ -1,5 +1,3 @@
-# unity_CCRacer-scriptsOnly-
-only scripts
 
 ## CCRacer 프로젝트 Script
 ```
