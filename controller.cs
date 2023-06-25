@@ -16,6 +16,7 @@ public class controller : MonoBehaviour
     public float[] gears;
     public float[] gearChangeSpeed;
     public AnimationCurve enginePower;
+    public int BrakePowerValue;
 
 
     [HideInInspector]public int gearNum = 1;
@@ -35,13 +36,13 @@ public class controller : MonoBehaviour
     public GameObject cam;
 
 
-    private float smoothTime = 0.09f;
+    private float smoothTime = 0.05f;
 
 
 	private WheelFrictionCurve  forwardFriction,sidewaysFriction;
     private float radius = 6, brakPower = 0, DownForceValue = 10f,wheelsRPM ,driftFactor, lastValue ,horizontal , vertical,totalPower;
     private bool flag=false;
-
+    private float angleX, angleY, angleZ;
 
 
 
@@ -56,6 +57,7 @@ public class controller : MonoBehaviour
     private void Update() {
 
         //if(SceneManager.GetActiveScene().name == "awakeScene")return;
+        //Debug.Log($"last: {lastValue}, engine : {engineRPM}");
 
         horizontal = IM.horizontal;
         vertical = IM.vertical;
@@ -66,6 +68,7 @@ public class controller : MonoBehaviour
         steerVehicle();
         calculateEnginePower();
         adjustTraction();
+        //carRatateClamp();
         if (isFinished) stopVehicle();
     }
 
@@ -93,7 +96,7 @@ public class controller : MonoBehaviour
 
         float velocity  = 0.0f;
         if (engineRPM >= maxRPM || flag ){
-            engineRPM = Mathf.SmoothDamp(engineRPM, maxRPM - 500, ref velocity, 0.04f);
+            engineRPM = Mathf.SmoothDamp(engineRPM, maxRPM - 500, ref velocity, 0.02f);
 
             flag = (engineRPM >= maxRPM - 450)?  true : false;
             test = (lastValue > engineRPM) ? true : false;
@@ -105,6 +108,10 @@ public class controller : MonoBehaviour
         if (engineRPM >= maxRPM + 1000) engineRPM = maxRPM + 1000; // clamp at max
         moveVehicle();
         shifter();
+        //Debug.Log($"abs: {Mathf.Abs(wheelsRPM)}, gears : {gears[gearNum]}");
+        //Debug.Log($"last: {lastValue}, engine : {engineRPM}");
+        //Debug.Log(lastValue+"lastValue");
+        //Debug.Log(engineRPM + "engineRPM");
     }
 
     private void wheelRPM(){
@@ -116,8 +123,9 @@ public class controller : MonoBehaviour
             R++;
         }
         wheelsRPM = (R != 0) ? sum / R : 0;
- 
-        if(wheelsRPM < 0 && !reverse ){
+        //wheelsRPM = sum / R;
+
+        if (wheelsRPM < 0 && !reverse ){
             reverse = true;
             manager.changeGear();
         }
@@ -161,7 +169,7 @@ public class controller : MonoBehaviour
 
         for (int i = 0; i < wheels.Length; i++)
         {
-            if ((KPH > 340) || (wheelsRPM <= 0 && KPH > 97))
+            if ((KPH > 380) || (wheelsRPM <= 0 && KPH > 97))
             {
                 wheels[i].motorTorque = 0;
                 wheels[i].brakeTorque = brakPower;
@@ -181,7 +189,7 @@ public class controller : MonoBehaviour
     private void brakeVehicle(){
 
         if (vertical < 0){
-            brakPower =(KPH >= 100)? 3000 : 1000;
+            brakPower =(KPH >= 100)? BrakePowerValue : 1000;
             if(wheelsRPM <= 0)
             {
                 brakPower = 0;
@@ -203,7 +211,9 @@ public class controller : MonoBehaviour
     {
        
         IM.KeyboardStatus = false;
-        IM.vertical = -5.0f;
+        if (wheels[0].rpm < 0) IM.vertical = 5.0f;
+        else if (wheels[0].rpm == 0) IM.vertical = 0.0f;
+        else IM.vertical = -5.0f;
         IM.horizontal = 0.0f;
         
         if (KPH <= 5)
@@ -345,6 +355,42 @@ public class controller : MonoBehaviour
         transform.rotation = spawnplace.rotation;
         cam.transform.position = camSpawnplace.position;
         rigidbody.velocity = new Vector3(0, 0, 0);
+    }
+
+    public void carRatateClamp()
+    {
+
+        Quaternion z = transform.rotation;
+        if (z.z < -0.2f || z.z > 0.2f) { 
+        float zf;
+        z.z = Mathf.Clamp(z.z, -0.2f, 0.2f);
+        //z.z = 45;
+        /*if( z.z * 180 > 40f)
+        {
+            zf = 40;
+            //Debug.Log("++++++++++++++++++++++++++++++++++++++");
+        }
+        else if ( z.z * 180 < -40f)
+        {
+            zf = -40;
+            //Debug.Log("----------------------------");
+        }
+        else
+        {
+            zf = transform.eulerAngles.z;
+            //Debug.Log(transform.rotation.z);
+        }*/
+        angleX = transform.eulerAngles.x;
+        angleY = transform.eulerAngles.y;
+        //transform.rotation = Quaternion.Euler(new Vector3(angleX, angleY, zf));
+        // angleX = transform.eulerAngles.x;
+        // angleY = transform.eulerAngles.y;
+        // angleZ = transform.eulerAngles.z;
+        //angleZ = Mathf.Clamp(angleZ, 0, 45);
+
+
+        transform.eulerAngles = new Vector3(angleX, angleY, z.z * 180);
+        }
     }
 
 }

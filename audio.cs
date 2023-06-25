@@ -40,6 +40,9 @@ using Random = UnityEngine.Random;
         public float dopplerLevel = 1;                                              // The mount of doppler effect used in the audio
         public bool useDoppler = true;                                              // Toggle for using doppler
 
+        public float onVolume;
+        public float offVolume;
+
         private AudioSource m_LowAccel; // Source for the low acceleration sounds
         private AudioSource m_LowDecel; // Source for the low deceleration sounds
         private AudioSource m_HighAccel; // Source for the high acceleration sounds
@@ -115,6 +118,8 @@ using Random = UnityEngine.Random;
                     m_HighAccel.pitch = pitch*pitchMultiplier*highPitchMultiplier;
                     m_HighAccel.dopplerLevel = useDoppler ? dopplerLevel : 0;
                     m_HighAccel.volume = 1;
+                    m_HighAccel.volume = onVolume;
+                    //m_HighDecel.volume = offVolume;
                 }
                 else
                 {

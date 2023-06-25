@@ -28,7 +28,7 @@ public class lapUIManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GManager.m_TotalSeconds >= 4)
+        if (GManager.m_TotalSeconds >= FirstLapSeconds + 4)
         {
             currentLapRecord.text = "";
         }
@@ -44,7 +44,9 @@ public class lapUIManager : MonoBehaviour
             }
             else if(laps == 2)
             {
+                /*
                 SecondLapSeconds= GManager.m_TotalSeconds;
+                
                 if (FirstLapSeconds >= SecondLapSeconds)
                 {
                     TotalBest = SecondLapSeconds;
@@ -52,7 +54,8 @@ public class lapUIManager : MonoBehaviour
                 else
                 {
                     TotalBest = FirstLapSeconds;
-                }
+                }*/
+                TotalBest = GManager.m_TotalSeconds;
                     
                 GManager.finishGame();
                 
@@ -65,7 +68,7 @@ public class lapUIManager : MonoBehaviour
                 FirstLapSeconds = GManager.m_TotalSeconds;
                 Record.text = currentTimer.text;
                 currentLapRecord.text = Record.text;
-                GManager.m_TotalSeconds = 0;
+                //GManager.m_TotalSeconds = 0;
             }
         }  
     }

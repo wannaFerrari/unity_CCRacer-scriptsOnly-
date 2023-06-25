@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using System;
+using UnityEditor.Rendering.LookDev;
 
 public class GameManager : MonoBehaviour {
     public GameObject car;
@@ -14,7 +15,7 @@ public class GameManager : MonoBehaviour {
     public Text kph;
     public Text currentPosition;
     public Text gearNum;
-    private float startPosiziton = 32f, endPosition = -211f;
+    private float startPosiziton = 174f, endPosition = -90f;   //32f ,  -211f
     private float desiredPosition;
 
     private int count4 = 0;
@@ -30,7 +31,7 @@ public class GameManager : MonoBehaviour {
     private float finishCounter = 0;
 
     [Header("countdown Timer")]
-    public float timeLeft = 7;
+    public float timeLeft = 9;
     public Text timeLeftText;
     private float timeLeftFloat;
 
@@ -60,14 +61,66 @@ public class GameManager : MonoBehaviour {
     public GameObject GL4;
 
     [Header("Cameras")]
-    public Camera[] Cameras;
+    public Camera mainCamera;
+    public Camera leftCam, frontCam, rightCam;
+    private Camera[] Cameras;
 
     [Header("ReSpawn")]
     public GameObject SpawnPoint;
+
+    [Header("Start Banner")]
+    public GameObject TimeAttackBanner;
+    public GameObject SupraBanner;
+    public GameObject PorscheBanner;
+    public GameObject ChironBanner;
+
+    [Header("Selected Car")]
+    public GameObject Supra;
+    public GameObject Porsche;
+    public GameObject Chiron;
+
+    [Header("Ghost Cars")]
+    public GameObject SupraGhost;
+    public GameObject ChironGhost;
+    public GameObject PorscheGhost;
+    public ghostPlayer ghostPlayer;
+
+    public ghostRecorder gRecorder;
+
+    public int selectedCarNum = 0;
+    public bool activateGhostCars;
+
+    private GameObject SelectedBanner;
+
+    private bool isStarted = false;
+    private float carInfoPosition;
+
+
+    private RectTransform timaAttackBanner, carInfoBanner;
+
     private bool countdownFlag = false;
     private void Awake () {
+        selectedCarNum = savedData.data.currentCar;
+        savedData.data.ghostDatas.currentCar = selectedCarNum;
+        activateGhostCars = savedData.data.activateGhost;
+        //Debug.Log(activateGhostCars);
+        
+        Debug.Log(savedData.data.ghostDatas.savedGhostRecordTime);
+        savedData.data.ghostDatas.isGhost = true;
+        savedData.data.ghostDatas.isPlay = true;
+        //Instantiate(zz, savedData.data.ghostDatas.savedGhostPosition[0], Quaternion.identity);
 
+        loadCar(selectedCarNum);
+        //setGhosts();
         RR = GameObject.FindGameObjectWithTag ("Player").GetComponent<controller> ();
+        car = GameObject.FindGameObjectWithTag("Player");
+        gRecorder = GameObject.FindGameObjectWithTag("Player").GetComponent<ghostRecorder>();
+        //moveBanner();
+        //selectedCarNum = savedData
+        //selectedCarNum = savedData.data.currentCar;
+        //Debug.Log(selectedCarNum);
+        setCameras();
+        setBanner();
         RaceUI.SetActive(false);
         SpeedUI.SetActive(false);
         StartCoroutine (timedLoop ());
@@ -76,7 +129,12 @@ public class GameManager : MonoBehaviour {
     private void FixedUpdate () {
         kph.text = RR.KPH.ToString ("0"); //숫자만
         updateNeedle ();
-        coundDownTimer();
+
+        if (!isStarted)
+        {
+            coundDownTimer();
+            moveBanner();
+        }
 
         if (m_IsPlaying)
         {
@@ -120,7 +178,13 @@ public class GameManager : MonoBehaviour {
         if (timeLeft > 1) { timeLeftText.text = timeLeft.ToString("0"); timeLeftFloat = float.Parse(timeLeftText.text); }
         else timeLeftText.text = "";
         
-        if (timeLeftFloat == 4.0 && count4 == 0) { startScript.countSoundPlay(); count4 = 1; timeAttack.SetActive(false); RL1.SetActive(true); }
+        if (timeLeftFloat == 4.0 && count4 == 0) { 
+            startScript.countSoundPlay(); count4 = 1; 
+            timeAttack.SetActive(false); 
+            RL1.SetActive(true);
+            TimeAttackBanner.SetActive(false);
+            SelectedBanner.SetActive(false);
+        }
         else if (timeLeftFloat == 3.0 && count3 == 0) { startScript.countSoundPlay(); count3 = 1; RL2.SetActive(true); }
         else if (timeLeftFloat == 2.0 && count2 == 0) { startScript.countSoundPlay(); count2 = 1; RL3.SetActive(true); }
         else if (timeLeftFloat == 1.0 && count1 == 0) { 
@@ -132,7 +196,7 @@ public class GameManager : MonoBehaviour {
             GL2.SetActive(true);
             GL3.SetActive(true);
             GL4.SetActive(true);
-
+            
         }
 
     }
@@ -161,16 +225,23 @@ public class GameManager : MonoBehaviour {
         GL3.SetActive(false);
         GL4.SetActive(false);
 
+        isStarted = true;
+        ghostPlayer.StartGhost();
+        gRecorder.StartRecording();
+        
+
     }
 
-    public void loadAwakeScene(){
-        SceneManager.LoadScene("awakeScene");
-    }
+   // public void loadAwakeScene(){
+       // SceneManager.LoadScene("awakeScene");
+    //}
 
     public void finishGame()
     {
         RR.isFinished = true;
         Finished = true;
+        savedData.data.ghostDatas.isGhost = false;
+        savedData.data.ghostDatas.isPlay = false;
     }
 
     private void finishedTimer()
@@ -194,6 +265,10 @@ public class GameManager : MonoBehaviour {
             startScript.recordSoundPlay();
             recordSound = 1;
             BestRecordTime.text = timer2;
+
+            ghostPlayer.DestroyGhostCar();
+            savedData.data.ghostDatas.currentClearedTime = m_TotalSeconds;
+            CompareGhostRecord();
         }
 
         if(finishCounter >= 6)
@@ -210,11 +285,26 @@ public class GameManager : MonoBehaviour {
         
     }
 
+    public void setCameras()
+    {
+        leftCam = GameObject.FindWithTag("leftCam").GetComponent<Camera>();
+        frontCam = GameObject.FindWithTag("frontCam").GetComponent<Camera>();
+        rightCam = GameObject.FindWithTag("rightCam").GetComponent<Camera>();
+        //leftCam.GetComponent<Camera>().enabled = true;
+        /*Cameras[0] = mainCamera;
+        Cameras[1] = leftCam;
+        Cameras[2] = frontCam;
+        Cameras[3] = rightCam;*/
+
+
+    }
+
     public void cameraChange(int num)
     {
-        for(int i = 0; i < Cameras.Length; i++)
+        /*
+        for (int i=0; i<Cameras.Length; i++)
         {
-            if(i == num)
+            if ( num == i)
             {
                 Cameras[num].enabled = true;
             }
@@ -222,9 +312,154 @@ public class GameManager : MonoBehaviour {
             {
                 Cameras[i].enabled = false;
             }
+        }*/
+        if ( num == 0)
+        {
+            mainCamera.enabled = true;
+            leftCam.enabled = false;    
+            frontCam.enabled = false;   
+            rightCam.enabled = false;   
+        }
+        else if (num == 1)
+        {
+            mainCamera.enabled = false;
+            leftCam.enabled = true;
+            frontCam.enabled = false;
+            rightCam.enabled = false;
+        }
+        else if (num == 2)
+        {
+            mainCamera.enabled = false;
+            leftCam.enabled = false;
+            frontCam.enabled = true;
+            rightCam.enabled = false;
+        }
+        else if (num == 3)
+        {
+            mainCamera.enabled = false;
+            leftCam.enabled = false;
+            frontCam.enabled = false;
+            rightCam.enabled = true;
         }
     }
+    public void setBanner()
+    {
+        TimeAttackBanner.SetActive(true);
+        timaAttackBanner = TimeAttackBanner.GetComponent<RectTransform>();
+        if( selectedCarNum == 0)
+        {
+            SupraBanner.gameObject.SetActive(true);
+            SelectedBanner = SupraBanner;
+            carInfoBanner = SelectedBanner.GetComponent<RectTransform>();
+        }
+        else if (selectedCarNum == 1)
+        {
+            PorscheBanner.gameObject.SetActive(true);
+            SelectedBanner = PorscheBanner;
+            carInfoBanner = SelectedBanner.GetComponent<RectTransform>();
+        }
+        else if (selectedCarNum == 2)
+        {
+            ChironBanner.gameObject.SetActive(true);
+            SelectedBanner = ChironBanner;
+            carInfoBanner = SelectedBanner.GetComponent<RectTransform>();
+        }
+        //carInfoBanner = SupraBanner.GetComponent<RectTransform>();
+    }
 
+    public void moveBanner()
+    {
+        //SupraBanner.transform.Translate (Vector3.)
+       // SupraBanner.transform.position = new Vector3(500, 0, 0);
+        //RectTransform su = SupraBanner.GetComponent<RectTransform>();
+        //su.anchoredPosition = new Vector2(1300,0);
+        //RectTransform ta = TimeAttackBanner.GetComponent<RectTransform>();
+        // ta.anchoredPosition = new Vector2(-1300,0);
+        if (timeLeft > 8.2 && timeLeft <= 8.8)
+        {
+            carInfoPosition = carInfoBanner.anchoredPosition.x - 45f;
+        }
+        else if (timeLeft > 5.3 && timeLeft <= 8.2)
+        {
+            carInfoPosition = carInfoBanner.anchoredPosition.x - 4f;
+        }
+        else if (timeLeft > 5 && timeLeft <= 5.3)
+        {
+            carInfoPosition = carInfoBanner.anchoredPosition.x - 70f;
+        }
+        else
+        {
+            carInfoPosition = carInfoBanner.anchoredPosition.x;
+        }
+        carInfoBanner.anchoredPosition = new Vector2(carInfoPosition,0);
+        timaAttackBanner.anchoredPosition = new Vector2(-carInfoPosition, 344);
+
+    }
+
+    public void loadCar(int n)
+    {
+        if( n == 0 )
+        {
+            Porsche.SetActive(false);
+            Chiron.SetActive(false);
+            Supra.SetActive(true);
+            Destroy(Porsche);
+            Destroy(Chiron);
+        }
+        else if (n == 1 )
+        {
+            Chiron.SetActive(false);
+            Supra.SetActive(false);
+            Porsche.SetActive(true);
+            Destroy(Chiron);
+            Destroy(Supra);
+        }
+        else if ( n == 2 )
+        {
+            Supra.SetActive(false);
+            Porsche.SetActive(false);
+            Chiron.SetActive(true);
+            Destroy(Supra);
+            Destroy(Porsche);
+        }
+    }
+    public void setGhosts()
+    {
+        if(activateGhostCars)
+        {
+            if (selectedCarNum == 0)
+            {
+                PorscheGhost.SetActive(false);
+                ChironGhost.SetActive(false);
+                SupraGhost.SetActive(true);
+                Destroy(ChironGhost);
+                Destroy(PorscheGhost);
+            }
+            else if (selectedCarNum == 1)
+            {
+                ChironGhost.SetActive(false);
+                SupraGhost.SetActive(false);
+                PorscheGhost.SetActive(true);
+                Destroy(ChironGhost);
+                Destroy(SupraGhost);
+            }
+            else if (selectedCarNum == 2)
+            {
+                SupraGhost.SetActive(false);
+                PorscheGhost.SetActive(false);
+                ChironGhost.SetActive(true);
+                Destroy(SupraGhost);
+                Destroy(PorscheGhost);
+            }
+        }
+    }
+    public void CompareGhostRecord()
+    {
+        if((savedData.data.ghostDatas.savedGhostRecordTime == -1f) || (savedData.data.ghostDatas.savedGhostRecordTime > m_TotalSeconds))
+        {
+            savedData.data.ghostDatas.UpdateSavedGhostDatas();
+        }
+    }
     string StockwatchTimer()
     {
         m_TotalSeconds += Time.deltaTime;
