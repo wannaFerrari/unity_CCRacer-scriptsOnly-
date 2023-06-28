@@ -35,21 +35,23 @@ public class controller : MonoBehaviour
     public Transform camSpawnplace;
     public GameObject cam;
 
+    //public Rigidbody rig;
 
     private float smoothTime = 0.05f;
 
 
 	private WheelFrictionCurve  forwardFriction,sidewaysFriction;
-    private float radius = 6, brakPower = 0, DownForceValue = 10f,wheelsRPM ,driftFactor, lastValue ,horizontal , vertical,totalPower;
+    private float radius = 6, brakPower = 0, DownForceValue = 10f, angleItem = 0f,itemTorque = 0f, itemWeight = 0f, wheelsRPM ,driftFactor, lastValue ,horizontal , vertical,totalPower;
     private bool flag=false;
     private float angleX, angleY, angleZ;
 
 
 
     private void Awake() {
-
+       // rig = this.GetComponent<Rigidbody>();
         //if(SceneManager.GetActiveScene().name == "awakeScene")return;
         getObjects();
+        rigidbody.mass += itemWeight;
         StartCoroutine(timedLoop());
 
     }
@@ -84,12 +86,12 @@ public class controller : MonoBehaviour
             }
         if (vertical < 0)
         {
-            totalPower = 3.6f * enginePower.Evaluate(engineRPM) * (vertical) * 1.1f;
+            //totalPower = 3.6f * (enginePower.Evaluate(engineRPM) + itemTorque) * (vertical) * 1.1f;
 
         }
         else
         {
-            totalPower = 3.6f * enginePower.Evaluate(engineRPM) * (vertical);
+            totalPower = 3.6f * (enginePower.Evaluate(engineRPM) + itemTorque) * (vertical);
         }
         
 
@@ -190,7 +192,7 @@ public class controller : MonoBehaviour
 
         if (vertical < 0){
             brakPower =(KPH >= 100)? BrakePowerValue : 1000;
-            if(wheelsRPM <= 0)
+            if(wheelsRPM < 0)
             {
                 brakPower = 0;
             }
@@ -230,12 +232,18 @@ public class controller : MonoBehaviour
 		//steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * horizontalInput;
          
         if (horizontal > 0 ) {
-				//rear tracks size is set to 1.5f       wheel base has been set to 2.55f
-            wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * horizontal;
-            wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * horizontal;
-        } else if (horizontal < 0 ) {                                                          
-            wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * horizontal;
-            wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * horizontal;
+            //rear tracks size is set to 1.5f       wheel base has been set to 2.55f
+            //wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * horizontal;
+            //wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * horizontal;
+            wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + (angleItem * 0.1f)) / (radius + (1.5f / 2))) * horizontal;
+            wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + angleItem * 0.1f) / (radius - (1.5f / 2))) * horizontal;
+            Debug.Log(wheels[0].steerAngle);
+            //                                         (앞바퀴 뒷바퀴 사이 거리) / (선회중심점 + (양바퀴 사이거리 / 2))
+        } else if (horizontal < 0 ) {
+            //wheels[0].steerAngle =  Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * horizontal;
+            //wheels[1].steerAngle =  Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * horizontal;
+            wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + angleItem * 0.1f) / (radius - (1.5f / 2))) * horizontal;
+            wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + angleItem * 0.1f) / (radius + (1.5f / 2))) * horizontal;
 
         } else {
             wheels[0].steerAngle =0;

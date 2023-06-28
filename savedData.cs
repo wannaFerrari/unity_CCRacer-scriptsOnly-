@@ -6,7 +6,7 @@ public class savedData : MonoBehaviour
 {
     public static savedData data;
 
-    public int currentCar;
+    public int currentCar = 0;
     public bool activateGhost;
     public bool playerIsPlaying = true;
     public ghost ghostDatas;

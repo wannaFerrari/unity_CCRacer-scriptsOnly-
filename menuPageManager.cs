@@ -31,6 +31,15 @@ public class menuPageManager : MonoBehaviour
     public ghost S_porsche;
     public ghost S_chiron;
 
+    [Header("ColorPanel")]
+    public GameObject colorPanel;
+    public GameObject colorBack;
+    public GameObject colorReset;
+    public GameObject colorSave;
+
+    [Header("sliderControll")]
+    public colorSliderControll csc;
+
     private Toggle ghostToggle;
     private bool ischecked = false;
 
@@ -41,7 +50,7 @@ public class menuPageManager : MonoBehaviour
 
     public AudioClip clickSound;
 
-    [HideInInspector] public int selectedCar = 0;
+    [HideInInspector] public int selectedCar;
     AudioSource AS2;
  
 
@@ -132,10 +141,12 @@ public class menuPageManager : MonoBehaviour
         chiCarNamePanel.SetActive(false);
         selectedCar = 0;
         savedData.data.currentCar= selectedCar;
+        csc.carChanged();
 
     }
     public void porscheClicked()
     {
+        //csc.carChanging();
         supPanel.SetActive(false);
         supCarNamePanel.SetActive(false);
         porPanel.SetActive(true);
@@ -144,6 +155,7 @@ public class menuPageManager : MonoBehaviour
         chiCarNamePanel.SetActive(false);
         selectedCar = 1;
         savedData.data.currentCar = selectedCar;
+        csc.carChanged();
 
     }
     public void chirionClicked()
@@ -156,6 +168,7 @@ public class menuPageManager : MonoBehaviour
         chiCarNamePanel.SetActive(true);
         selectedCar = 2;
         savedData.data.currentCar = selectedCar;
+        csc.carChanged();
 
     }
 
@@ -236,6 +249,34 @@ public class menuPageManager : MonoBehaviour
         closeBtn.SetActive(true);
 
     }
+
+    public void ColorChangeBtnClicked()
+    {
+        csc.GetColor();
+        iButtons.SetActive(false);
+        colorPanel.SetActive(true);
+    }
+
+    public void ColorResetBtnClicked()
+    {
+        //csc.GetColor();
+        csc.ResetColorToDefault();
+    }
+
+    public void ColorSaveBtnClicked()
+    {
+        //csc.GetColor();
+        colorPanel.SetActive(false);
+        iButtons.SetActive(true);
+    }
+
+    public void ColorBackBtnClicked()
+    {
+        //csc.GetColor();
+        csc.RecoverBackColor();
+        colorPanel.SetActive(false);
+        iButtons.SetActive(true);
+    }
     public void ghostToggleValueChange(Toggle ghosttoggle)
     {
         //Debug.Log("111111111111111111111" + ghosttoggle.isOn);
@@ -280,12 +321,12 @@ public class menuPageManager : MonoBehaviour
     }
     public void mouseControll()
     {
-        if(Input.GetMouseButtonDown(0))
+        if(Input.GetMouseButtonDown(1))
         {
             rotating = true;
             mousePos = Input.mousePosition;
         }
-        else if (Input.GetMouseButtonUp(0)) { 
+        else if (Input.GetMouseButtonUp(1)) { 
         
             rotating = false;
         }
