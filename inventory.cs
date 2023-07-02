@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class inventory : MonoBehaviour
 {
@@ -13,7 +15,9 @@ public class inventory : MonoBehaviour
     public delegate void OnChangeItem();
     public OnChangeItem onChangeItem;
 
-    public List<item>items = new List<item>();
+    public List<item> PowerItems = new List<item>();
+    public List<item> DriveItems = new List<item>();
+    public List<item> SpecialItems= new List<item>();
 
     private int slotCnt;
     public item test2;
@@ -36,42 +40,139 @@ public class inventory : MonoBehaviour
             return;
         }
         instance = this;
+        //SlotCnt = 27;
         
     }
 
     private void Start()
     {
         SlotCnt = 27;
+        //Invoke("SetSlot", 1f);
+        Invoke("InitialMakeItem", 0.1f);
+    }
+    public void SetSlot()
+    {
+        SlotCnt = 27;
     }
     public bool AddItem(item _item)
     {
-        items.Add(_item);
-        if(onChangeItem!= null)
-        onChangeItem.Invoke();
+        if (_item.itemType == ItemType.PowerUp)
+        {
+            PowerItems.Add(_item);
+        }
+        else if(_item.itemType == ItemType.DrivingUP)
+        {
+            DriveItems.Add(_item);
+        }
+        else if(_item.itemType ==ItemType.Special)
+        {
+            SpecialItems.Add(_item);
+        }
+        if (onChangeItem != null)
+        {
+            onChangeItem.Invoke();
+            //Debug.Log("invoke");
+        }
         return true;
     }
 
-    private void TestItem()
+    public void RemoveItem(int _index, item _item)
     {
-        //fieldItems
-        if (Input.GetKeyDown(KeyCode.B))
+        if(_item.itemType == ItemType.PowerUp)
         {
-            //Debug.Log("BBBBBBBBBBBBBBBBBBBB");
-           // fieldItems a = GameObject.FindGameObjectWithTag("Item").GetComponent<fieldItems>();
-           // Debug.Log(a);
-            //Debug.Log("aaaaaaaaaaaaaaaaaa");
-           // Debug.Log(AddItem(a.GetItem()));
-            for (int i = 0; i < itemDatabase.instance.itemDB.Count; i++) 
+            PowerItems.RemoveAt(_index);
+        }
+        else if(_item.itemType == ItemType.DrivingUP)
+        {
+           // Debug.Log(DriveItems[_index].itemName);
+            DriveItems.RemoveAt(_index);
+        }
+        else if(_item.itemType == ItemType.Special)
+        {
+            SpecialItems.RemoveAt(_index);
+        }
+
+        onChangeItem.Invoke();
+    }
+
+    private void InitialMakeItem()
+    {
+        if (savedData.data.ReturnInitialInventory())
+        {
+
+
+
+            for (int i = 1; i < 28/*itemDatabase.instance.itemDB.Count*/; i++)
             {
                 AddItem(itemDatabase.instance.itemDB[i]);
             }
-        }
+            for (int j = 28; j < 46;j++)
+            {
+                AddItem(itemDatabase.instance.itemDB[j]);
+                //Debug.Log(itemDatabase.instance.itemDB[j].itemName);
+            }
 
-        // Update is called once per frame
+            for (int k=46; k< 50; k++)
+            {
+                AddItem(itemDatabase.instance.itemDB[k]);
+            }
+           
+            savedData.data.ChangeInitialInventory();
+        }
        
+        
     }
-    private void Update()
+
+    public void UpLoadInvenToSavedData()
     {
-        TestItem();
+        savedData.data.ClearInvenList();
+        for(int i = 0; i<PowerItems.Count; i++)
+        {
+            savedData.data.AddPowerInvenItems(PowerItems[i]);
+        }
+        for(int i = 0; i<DriveItems.Count; i++)
+        {
+            savedData.data.AddDriveInvenItems(DriveItems[i]);
+        }
+        for(int i = 0; i<SpecialItems.Count;i++)
+        {
+            savedData.data.AddSpeicalInvenItems(SpecialItems[i], i);
+        }
     }
+
+    public void DownLoadInvenToSavedData()
+    {
+        //Debug.Log("---");
+        List<item> _item1;
+        List<item> _item2;
+        List<item> _item3;
+        _item1 = savedData.data.ReturnPowerInvenItems().ToList();
+        Debug.Log(_item1.Count);
+        //Debug.Log(_item.Count);
+        for(int i = 0; i<_item1.Count; i++)
+        {
+            //items.Add(_item[i]); Debug.Log(items[i].itemName + "ssssssssssssssssssssssssss");
+            AddItem(_item1[i]);
+            /*if (onChangeItem != null)
+            {
+                onChangeItem.Invoke();
+                Debug.Log("invoke");
+            }*/
+        }
+        //_item.Clear();
+        _item2 = savedData.data.ReturnDriveInvenItems().ToList();
+        for (int i = 0; i < _item2.Count; i++)
+        {
+            //Debug.Log(_item2[i].itemName);
+            AddItem(_item2[i]);
+        }
+        //_item.Clear();
+        _item3 = savedData.data.ReturnSpecialInvenItems().ToList();
+        for (int i = 0; i < _item3.Count; i++)
+        {
+            AddItem(_item3[i]);
+        }
+     
+    }
+  
 }

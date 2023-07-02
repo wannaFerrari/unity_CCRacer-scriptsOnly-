@@ -4,22 +4,23 @@ using UnityEngine;
 
   public enum ItemType
     {
+        None,
         PowerUp,
         DrivingUP,
-        DressUp,
-        Bodykit
+        Special
     }
 public enum parts
 {
-    pTurbo,
-    pThrottle,
-    pRadi,
-    pBigbo,
-    pAir,
-    pOil,
-    pInter,
-    pPipe,
-    pHicam,
+    None,
+    Turbo,
+    Air,
+    IntakePipe,
+    ThrottleBody,
+    HicamShaft,
+    Throttle,
+    InterCooler,
+    OilCoolder,
+    Radiator,
 
     dDisk,
     dPad,
@@ -31,6 +32,17 @@ public enum parts
     Wing,
 
     Bodykit,
+
+    /*
+    PowerSlots.Add(turbo);
+    PowerSlots.Add(air);
+    PowerSlots.Add(intakePipe);
+    PowerSlots.Add(throttleBody);
+    PowerSlots.Add(hicam);
+    PowerSlots.Add(throttle);
+    PowerSlots.Add(interCooler);
+    PowerSlots.Add(oilCooler);
+    PowerSlots.Add(Radiator);*/
 }
 
 [System.Serializable]
@@ -40,10 +52,22 @@ public class item
     public parts parts;
     public string itemName;
     public Sprite itemImage;
+    public float torque = 0f;
+    public float weight = 0f;
+    public float damper = 0f;
+    public float spring = 0f;
+    public float grip = 0f;
+    public float angle = 0f;
+    public float brakeVal = 0f;
+    public float downForce = 0f;
+    public string description = "";
+    public string korParts = "";
 
 
     public bool Use()
     {
-        return false;
+        bool isUsed = false;
+        isUsed = true;
+        return isUsed;
     }
 }

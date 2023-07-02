@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 public class menuPageManager : MonoBehaviour
 {
@@ -47,30 +48,73 @@ public class menuPageManager : MonoBehaviour
     float rotateSpeed = 20.0f;
     Vector3 mousePos, offset, rotation;
 
+    [Header("Canvas")]
+    public GameObject mainCanvas;
+    public GameObject itemCanvas;
+
 
     public AudioClip clickSound;
 
     [HideInInspector] public int selectedCar;
     AudioSource AS2;
- 
+
+    Ray ray;
+    RaycastHit hit;
+    GraphicRaycaster gr;
+    public Canvas cv;
 
     void Awake()
     {
         selectedCar = savedData.data.currentCar;
         AS2 = this.GetComponent<AudioSource>();
 
-       
+       gr = cv.GetComponent<GraphicRaycaster>();
 
     }
     private void Start()
     {
+        Invoke( "dl" ,0.1f);
+        
         //ghostToggle = GetComponent<Toggle>();
     }
     private void Update()
     {
         updateCarSelected();
         mouseControll();
-        if( rotating)
+        //Debug.Log(EventSystem.current.IsPointerOverGameObject());
+        /*if (EventSystem.current.IsPointerOverGameObject())
+        {
+            var ped = new PointerEventData(null);
+            ped.position = Input.mousePosition;
+            List<RaycastResult> results = new List<RaycastResult>();
+            gr.Raycast(ped, results);
+
+            if(results.Count <=0)
+            {
+                return;
+            }
+            if (results[0].gameObject.CompareTag("InvenItemImage"))
+            {
+                Debug.Log(results[1].gameObject.GetComponent<slot>().item.itemName);
+
+            }
+            else
+            {
+                //Debug.Log(results[0].gameObject.GetComponent<slot>().item.itemName);
+            }
+            //results[0].gameObject.transform.position = ped.position;
+            /*
+            ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out hit, 5000))
+            {
+                Debug.Log("name : " + hit.collider.name);
+                //PlayMakerFSM fsm = hit.collider.GetComponent<PlayMakerFSM>();
+                //fsm.SendEvent("이벤트명");
+            }*/
+            //EventSystem.current.RaycastAll()
+        //}*/
+
+        if ( rotating)
         {
             offset = (Input.mousePosition - mousePos);
             rotation.y = -(offset.x + offset.y) * Time.deltaTime * rotateSpeed;
@@ -106,6 +150,7 @@ public class menuPageManager : MonoBehaviour
     {
         clickSoundPlay();
         //if(checkGhostAvailable(1))
+        this.GetComponent<ItemManager>().RequestUpLoadToSavedData();
         loadingSceneController.LoadScene("LongTrack");
         Debug.Log("Long clicked");
     }
@@ -277,6 +322,20 @@ public class menuPageManager : MonoBehaviour
         colorPanel.SetActive(false);
         iButtons.SetActive(true);
     }
+
+    public void ItemPanelOpenBtnClicked()
+    {
+        mainCanvas.SetActive(false);
+        itemCanvas.SetActive(true);
+        //mainCanvas.SetActive(true);
+    }
+
+    public void ItemBackBtnClicked()
+    {
+        itemCanvas.SetActive(false);
+        mainCanvas.SetActive(true);
+
+    }
     public void ghostToggleValueChange(Toggle ghosttoggle)
     {
         //Debug.Log("111111111111111111111" + ghosttoggle.isOn);
@@ -330,6 +389,11 @@ public class menuPageManager : MonoBehaviour
         
             rotating = false;
         }
+    }
+
+    public void dl()
+    {
+        this.GetComponent<ItemManager>().RequestDownLoadFromSavedData();
     }
     /*
     public bool checkGhostAvailable(int track)

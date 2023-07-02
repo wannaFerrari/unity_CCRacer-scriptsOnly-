@@ -51,7 +51,12 @@ public class controller : MonoBehaviour
        // rig = this.GetComponent<Rigidbody>();
         //if(SceneManager.GetActiveScene().name == "awakeScene")return;
         getObjects();
+        itemTorque = savedData.data.savedTorque;
+        itemWeight = savedData.data.savedWeight;
         rigidbody.mass += itemWeight;
+        //this.GetComponent<Rigidbody>().mass += itemWeight;
+        Debug.Log(itemTorque);
+        //Debug.Log(rigidbody.mass);
         StartCoroutine(timedLoop());
 
     }
@@ -79,14 +84,14 @@ public class controller : MonoBehaviour
         wheelRPM();
 
             if (vertical != 0 ){
-                rigidbody.drag = 0.005f; 
+            rigidbody.drag = 0.005f; 
             }
             if (vertical == 0){
                 rigidbody.drag = 0.1f;
             }
         if (vertical < 0)
         {
-            //totalPower = 3.6f * (enginePower.Evaluate(engineRPM) + itemTorque) * (vertical) * 1.1f;
+            totalPower = 3.6f * (enginePower.Evaluate(engineRPM) + itemTorque) * (vertical) * 1.1f;
 
         }
         else
@@ -171,7 +176,7 @@ public class controller : MonoBehaviour
 
         for (int i = 0; i < wheels.Length; i++)
         {
-            if ((KPH > 380) || (wheelsRPM <= 0 && KPH > 97))
+            if ((KPH > 380 + (itemTorque/2)) || (wheelsRPM <= 0 && KPH > 97))
             {
                 wheels[i].motorTorque = 0;
                 wheels[i].brakeTorque = brakPower;
@@ -237,7 +242,7 @@ public class controller : MonoBehaviour
             //wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * horizontal;
             wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + (angleItem * 0.1f)) / (radius + (1.5f / 2))) * horizontal;
             wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + angleItem * 0.1f) / (radius - (1.5f / 2))) * horizontal;
-            Debug.Log(wheels[0].steerAngle);
+            //Debug.Log(wheels[0].steerAngle);
             //                                         (앞바퀴 뒷바퀴 사이 거리) / (선회중심점 + (양바퀴 사이거리 / 2))
         } else if (horizontal < 0 ) {
             //wheels[0].steerAngle =  Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * horizontal;
@@ -321,7 +326,7 @@ public class controller : MonoBehaviour
 			sidewaysFriction = wheels[0].sidewaysFriction;
 
 			forwardFriction.extremumValue = forwardFriction.asymptoteValue = sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = 
-                ((KPH * handBrakeFrictionMultiplier) / 300) + 1.3f;
+                ((KPH * handBrakeFrictionMultiplier) / 300) + 1.1f;
 
 			for (int i = 0; i < 4; i++) {
 				wheels [i].forwardFriction = forwardFriction;
@@ -370,7 +375,7 @@ public class controller : MonoBehaviour
 
         Quaternion z = transform.rotation;
         if (z.z < -0.2f || z.z > 0.2f) { 
-        float zf;
+        //float zf;
         z.z = Mathf.Clamp(z.z, -0.2f, 0.2f);
         //z.z = 45;
         /*if( z.z * 180 > 40f)
