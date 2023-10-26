@@ -1,8 +1,9 @@
-﻿using System.Collections;
+﻿using Photon.Pun;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class carEffects : MonoBehaviour
+public class carEffects : MonoBehaviourPun
 {
     public Material brakeLights;
     public AudioSource skidClip;
@@ -21,6 +22,10 @@ public class carEffects : MonoBehaviour
     private void Start() {      
         controller = GetComponent<controller>();
         IM = GetComponent<inputManager>();
+        skidClip = gameObject.transform.Find("CarEffectAudioSource").transform.Find("skid").gameObject.GetComponent<AudioSource>();
+        crashClip = gameObject.transform.Find("CarEffectAudioSource").transform.Find("collide").gameObject.GetComponent<AudioSource>();
+        scratchClip = gameObject.transform.Find("CarEffectAudioSource").transform.Find("friction").gameObject.GetComponent<AudioSource>();
+
     }
 
     private void FixedUpdate() {
@@ -108,32 +113,41 @@ public class carEffects : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Track"))
+        if (photonView.IsMine)
         {
-            
-            crashClip.Play();
+            if (collision.gameObject.CompareTag("Track"))
+            {
+                //Debug.Log(controller.GetComponent<PhotonView>().Owner);
+                crashClip.Play();
+            }
         }
     }
     private void OnCollisionStay(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Track"))
+        if (photonView.IsMine)
         {
-            
-            if (!scratching)
+            if (collision.gameObject.CompareTag("Track"))
             {
-                scratching = true;
-                scratchClip.Play();
+
+                if (!scratching)
+                {
+                    scratching = true;
+                    scratchClip.Play();
+                }
+
             }
-            
         }
     }
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Track"))
+        if (photonView.IsMine)
         {
-            
-            scratching = false;
-            scratchClip.Stop();
+            if (collision.gameObject.CompareTag("Track"))
+            {
+
+                scratching = false;
+                scratchClip.Stop();
+            }
         }
     }
 

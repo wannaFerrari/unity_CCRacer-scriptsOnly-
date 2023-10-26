@@ -11,7 +11,7 @@ public class startScript : MonoBehaviour
     public AudioClip recordSound;
     AudioSource AS;
 
-    void Awake()
+    void Start()
     {
         AS = this.GetComponent<AudioSource>();
     }

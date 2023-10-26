@@ -103,14 +103,17 @@ public class colorSliderControll : MonoBehaviour
         if (currentCar == 0)
         {
             supra.color = new Color(r / 255f, g / 255f, b / 255f);
+            savedData.data.supColor = supra.color;
         }
         else if (currentCar == 1)
         {
             porsche.color = new Color(r / 255f, g / 255f, b / 255f);
+            savedData.data.porColor = porsche.color;
         }
         else if (currentCar == 2)
         {
             chiron.color = new Color(r / 255f, g / 255f, b / 255f);
+            savedData.data.chiColor = chiron.color;
         }
     }
 

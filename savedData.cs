@@ -59,6 +59,19 @@ public class savedData : MonoBehaviour
     public List<item> DriveInventoryList = new List<item>();
     public List<item> SpecialInventoryList = new List<item>();
 
+    [Header("save Color to database")]
+    public Color supColor;
+    public Color porColor;
+    public Color chiColor;
+
+    [Header("save Login data")]
+    public string userUid = "";
+    public string userNickName = "";
+    public int userWin = 0;
+    public int userLose = 0;
+    public float UserWinRate = 0;
+
+
 
     public bool isInitial = true;
     public bool firstSave = true;
@@ -145,11 +158,11 @@ public class savedData : MonoBehaviour
         }*/
     }
 
-    public void AddSpeicalInvenItems(item _item, int i)
+    public void AddSpeicalInvenItems(item _item)
     {
         //SpecialInventoryList.Clear();
-        //SpecialInventoryList.Add(_item);
-        SpecialInventoryList[i] = _item;
+        SpecialInventoryList.Add(_item);
+        //SpecialInventoryList[i] = _item;
     }
 
     public item[] ReturnPowerInvenItems()
@@ -173,5 +186,14 @@ public class savedData : MonoBehaviour
     public bool ReturnInitialInventory()
     {
         return isInitial;
+    }
+
+    public void LoadUserDataToSavedData(string Uid, string Nick, int Win, int Lose, float WinRate)
+    {
+        userUid = Uid;
+        userNickName = Nick;
+        userWin = Win;
+        userLose = Lose;
+        UserWinRate = WinRate;
     }
 }

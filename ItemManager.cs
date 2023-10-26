@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+//using static UnityEditor.Progress;
 using TMPro;
 //using UnityEngine.UIElements;
 //using static System.Net.Mime.MediaTypeNames;
@@ -325,19 +325,22 @@ public class ItemManager : MonoBehaviour
     {
         //Debug.Log(_item.description);
         //Debug.Log("des");
-        if(_item.itemType == ItemType.PowerUp)
+        float mx = Input.mousePosition.x + 200f;
+        float my = Input.mousePosition.y - 200f;
+
+        if (mx > 1689)
         {
-            float mx = Input.mousePosition.x;
-          
-            if(mx > 1689)
-            {
-                mx = 1689;
-            }
-            if(mx < 231)
-            {
-                mx = 231;
-            }
-            powerTooltip.transform.position = new Vector3(mx, Input.mousePosition.y);
+            mx = 1689;
+        }
+        if (mx < 231)
+        {
+            mx = 231;
+        }
+
+        if (_item.itemType == ItemType.PowerUp)
+        {
+            
+            powerTooltip.transform.position = new Vector3(mx, my);
             powerTooltip.SetActive(true);
             powerName.text = _item.itemName.ToString();
             powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n토크 " + _item.torque.ToString("+#;-#;0") + "\n무게 " + _item.weight.ToString("+#;-#;0");
@@ -348,19 +351,10 @@ public class ItemManager : MonoBehaviour
         }
         else if (_item.itemType == ItemType.DrivingUP)
         {
-            float mx = Input.mousePosition.x;
-
-            if (mx > 1689)
-            {
-                mx = 1689;
-            }
-            if (mx < 231)
-            {
-                mx = 231;
-            }
+           
             if ((_item.parts == parts.dDisk) || (_item.parts == parts.dPad))
             {
-                powerTooltip.transform.position = new Vector3(mx, Input.mousePosition.y);
+                powerTooltip.transform.position = new Vector3(mx, my);
                 powerTooltip.SetActive(true);
                 powerName.text = _item.itemName.ToString();
                 powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n브레이크 " + _item.brakeVal.ToString("+#;-#;0");
@@ -368,7 +362,7 @@ public class ItemManager : MonoBehaviour
             }
             else if(_item.parts == parts.dShoba)
             {
-                powerTooltip.transform.position = new Vector3(mx, Input.mousePosition.y);
+                powerTooltip.transform.position = new Vector3(mx, my);
                 powerTooltip.SetActive(true);
                 powerName.text = _item.itemName.ToString();
                 powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n뎀퍼 " + _item.damper.ToString("+#;-#;0");
@@ -376,7 +370,7 @@ public class ItemManager : MonoBehaviour
             }
             else if(_item.parts == parts.dSpring)
             {
-                powerTooltip.transform.position = new Vector3(mx, Input.mousePosition.y);
+                powerTooltip.transform.position = new Vector3(mx, my);
                 powerTooltip.SetActive(true);
                 powerName.text = _item.itemName.ToString();
                 powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n서스펜션 길이 " + _item.spring.ToString("+#;-#;0")+ "\n뎀퍼 " + _item.damper.ToString(" +#;-#;0");
@@ -384,7 +378,7 @@ public class ItemManager : MonoBehaviour
             }
             else if(_item.parts == parts.dTire)
             {
-                powerTooltip.transform.position = new Vector3(mx, Input.mousePosition.y);
+                powerTooltip.transform.position = new Vector3(mx, my);
                 powerTooltip.SetActive(true);
                 powerName.text = _item.itemName.ToString();
                 powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n브레이크 " + _item.brakeVal.ToString("+#;-#;0") + "\n접지력 " + _item.grip.ToString(" +#;-#;0");
@@ -392,7 +386,7 @@ public class ItemManager : MonoBehaviour
             }
             else if (_item.parts == parts.dAngle)
             {
-                powerTooltip.transform.position = new Vector3(mx, Input.mousePosition.y);
+                powerTooltip.transform.position = new Vector3(mx, my);
                 powerTooltip.SetActive(true);
                 powerName.text = _item.itemName.ToString();
                 powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n조향 각도 " + _item.angle.ToString("+#;-#;0");
@@ -403,19 +397,10 @@ public class ItemManager : MonoBehaviour
         }
         else if(_item.itemType == ItemType.Special)
         {
-            float mx = Input.mousePosition.x;
-
-            if (mx > 1689)
-            {
-                mx = 1689;
-            }
-            if (mx < 231)
-            {
-                mx = 231;
-            }
+           
             if (_item.parts == parts.Wing)
             {
-                powerTooltip.transform.position = new Vector3(mx, Input.mousePosition.y);
+                powerTooltip.transform.position = new Vector3(mx, my);
                 powerTooltip.SetActive(true);
                 powerName.text = _item.itemName.ToString();
                 powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n무게 " + _item.weight.ToString("+#;-#;0") + "\n다운포스 " + _item.downForce.ToString(" +#;-#;0");
@@ -423,7 +408,7 @@ public class ItemManager : MonoBehaviour
             }
             else if(_item.parts ==parts.Bodykit)
             {
-                powerTooltip.transform.position = new Vector3(mx, Input.mousePosition.y);
+                powerTooltip.transform.position = new Vector3(mx, my);
                 powerTooltip.SetActive(true);
                 powerName.text = _item.itemName.ToString();
                 powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n토크 " + _item.torque.ToString("+#;-#;0") + "\n무게 " + _item.weight.ToString(" +#;-#;0");

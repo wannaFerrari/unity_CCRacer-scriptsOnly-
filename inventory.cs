@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static UnityEditor.Progress;
+//using static UnityEditor.Progress;
 
 public class inventory : MonoBehaviour
 {
@@ -136,12 +136,16 @@ public class inventory : MonoBehaviour
         }
         for(int i = 0; i<SpecialItems.Count;i++)
         {
-            savedData.data.AddSpeicalInvenItems(SpecialItems[i], i);
+            savedData.data.AddSpeicalInvenItems(SpecialItems[i]);
         }
     }
 
     public void DownLoadInvenToSavedData()
     {
+        PowerItems.Clear();
+        DriveItems.Clear();
+        SpecialItems.Clear();
+        onChangeItem.Invoke();
         //Debug.Log("---");
         List<item> _item1;
         List<item> _item2;
@@ -153,6 +157,7 @@ public class inventory : MonoBehaviour
         {
             //items.Add(_item[i]); Debug.Log(items[i].itemName + "ssssssssssssssssssssssssss");
             AddItem(_item1[i]);
+            Debug.Log(_item1[i]);
             /*if (onChangeItem != null)
             {
                 onChangeItem.Invoke();
@@ -172,7 +177,8 @@ public class inventory : MonoBehaviour
         {
             AddItem(_item3[i]);
         }
-     
+        onChangeItem.Invoke();
+
     }
   
 }

@@ -22,6 +22,7 @@ public class inputManager : MonoBehaviour {
         EscKey();
         ResetKey();
         CameraKey();
+        FinishKey();
     }
 
     private void keyboard () {
@@ -51,30 +52,41 @@ public class inputManager : MonoBehaviour {
     {
         if (Input.GetKeyDown(KeyCode.R))
         {
-            GM.resetCar();
+            gameObject.GetComponent<controller>().resetCar();
             
         }
     }
-
+    
     private void CameraKey()
     {
+        
         if (Input.GetKey(KeyCode.Z))
         {
-            GM.cameraChange(1);
+            gameObject.GetComponent<controller>().cameraChange(1);
         }
         else if (Input.GetKey(KeyCode.X))
         {
-            GM.cameraChange(2);
+            gameObject.GetComponent<controller>().cameraChange(2);
         }
         else if (Input.GetKey(KeyCode.C))
         {
-            GM.cameraChange(3);
+            gameObject.GetComponent<controller>().cameraChange(3);
         }
         else
         {
-            GM.cameraChange(0);
+            gameObject.GetComponent<controller>().cameraChange(0);
         }
-        
+        //gameObject.GetComponent<controller>().mainCamera.enabled= true;
+
+    }
+
+    private void FinishKey()
+    {
+        if(Input.GetKeyDown(KeyCode.F))
+        {
+            GM = GameObject.FindGameObjectWithTag("gameManager").GetComponent<GameManager>();
+            GM.testFinish();
+        }
     }
 
 }

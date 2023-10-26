@@ -52,6 +52,13 @@ public class menuPageManager : MonoBehaviour
     public GameObject mainCanvas;
     public GameObject itemCanvas;
 
+    [Header("Wings")]
+    public GameObject supWing;
+    public GameObject porWing;
+    public GameObject chiWingOn;
+    public GameObject chiWingOff;
+
+
 
     public AudioClip clickSound;
 
@@ -63,6 +70,8 @@ public class menuPageManager : MonoBehaviour
     GraphicRaycaster gr;
     public Canvas cv;
 
+    
+
     void Awake()
     {
         selectedCar = savedData.data.currentCar;
@@ -73,7 +82,16 @@ public class menuPageManager : MonoBehaviour
     }
     private void Start()
     {
-        Invoke( "dl" ,0.1f);
+        if (ReturnIsNewAccountFromLoginSystem())
+        {
+            Invoke("dl", 0.1f);
+            ChangeNewAccountToNormalInLoginSystem();
+        }
+        else
+        {
+            Invoke("LoadClicked", 0.1f);
+        }
+        //LoadClicked();
         
         //ghostToggle = GetComponent<Toggle>();
     }
@@ -81,6 +99,7 @@ public class menuPageManager : MonoBehaviour
     {
         updateCarSelected();
         mouseControll();
+        WingStatus();
         //Debug.Log(EventSystem.current.IsPointerOverGameObject());
         /*if (EventSystem.current.IsPointerOverGameObject())
         {
@@ -151,7 +170,8 @@ public class menuPageManager : MonoBehaviour
         clickSoundPlay();
         //if(checkGhostAvailable(1))
         this.GetComponent<ItemManager>().RequestUpLoadToSavedData();
-        loadingSceneController.LoadScene("LongTrack");
+        //loadingSceneController.LoadScene("LongTrack");
+        loadingSceneController.LoadScene("Lobby");
         Debug.Log("Long clicked");
     }
 
@@ -159,7 +179,7 @@ public class menuPageManager : MonoBehaviour
     {
         clickSoundPlay();
         //if(checkGhostAvailable(2))
-        loadingSceneController.LoadScene("ShortTrack");
+        //loadingSceneController.LoadScene("ShortTrack");
         Debug.Log("short clicked");
     }
 
@@ -327,6 +347,7 @@ public class menuPageManager : MonoBehaviour
     {
         mainCanvas.SetActive(false);
         itemCanvas.SetActive(true);
+        
         //mainCanvas.SetActive(true);
     }
 
@@ -334,6 +355,7 @@ public class menuPageManager : MonoBehaviour
     {
         itemCanvas.SetActive(false);
         mainCanvas.SetActive(true);
+        SaveClicked();
 
     }
     public void ghostToggleValueChange(Toggle ghosttoggle)
@@ -388,6 +410,24 @@ public class menuPageManager : MonoBehaviour
         else if (Input.GetMouseButtonUp(1)) { 
         
             rotating = false;
+        }
+    }
+
+    public void WingStatus()
+    {
+        if(savedData.data.savedDownforce != 0)
+        {
+            supWing.SetActive(true);
+            porWing.SetActive(true);
+            chiWingOn.SetActive(true);
+            chiWingOff.SetActive(false);
+        }
+        else
+        {
+            supWing.SetActive(false);
+            porWing.SetActive(false);
+            chiWingOn.SetActive(false);
+            chiWingOff.SetActive(true);
         }
     }
 
@@ -480,5 +520,22 @@ public class menuPageManager : MonoBehaviour
         }
     }*/
 
+    public void LoadClicked()
+    {
+        GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<UserDataController>().OnClickLoadButton();
+    }
 
+    public void SaveClicked()
+    {
+        GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<UserDataController>().OnClickSaveButton();
+    }
+    public void ChangeNewAccountToNormalInLoginSystem()
+    {
+        GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<LoginSystem>().ChangeNewAccountToNormal();
+    }
+
+    public bool ReturnIsNewAccountFromLoginSystem()
+    {
+        return GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<LoginSystem>().ReturnIsNewAccount();
+    }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿//using Photon.Pun;
+using System;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -55,14 +56,17 @@ using Random = UnityEngine.Random;
         public Camera mainCamera;
         private void StartSound()
         {
-            // get the carcontroller ( this will not be null as we have require component)
-            //m_CarController = GetComponent<CarController>();
+        // get the carcontroller ( this will not be null as we have require component)
+        //m_CarController = GetComponent<CarController>();
 
-            // setup the simple audio source
-            m_HighAccel = SetUpEngineAudioSource(highAccelClip);
+        // setup the simple audio source
+        m_HighAccel = SetUpEngineAudioSource(highAccelClip);
 
-            // if we have four channel audio setup the four audio sources
-            if (engineSoundStyle == EngineAudioOptions.FourChannel)
+        //photonView.RPC("SetUpEngineAudioSource", RpcTarget.All, highAccelClip);
+
+        // if we have four channel audio setup the four audio sources
+        
+        if (engineSoundStyle == EngineAudioOptions.FourChannel)
             {
                 m_LowAccel = SetUpEngineAudioSource(lowAccelClip);
                 m_LowDecel = SetUpEngineAudioSource(lowDecelClip);
@@ -163,24 +167,7 @@ using Random = UnityEngine.Random;
         }
 
 
-        // sets up and adds new audio source to the gane object
-        private AudioSource SetUpEngineAudioSource(AudioClip clip)
-        {
-            // create the new audio source component on the game object and set up its properties
-            AudioSource source = gameObject.AddComponent<AudioSource>();
-            source.clip = clip;
-            source.volume = 0;
-            source.spatialBlend = 1;
-            source.loop = true;
-
-            // start the clip from a random point
-            source.time = Random.Range(0f, clip.length);
-            source.Play();
-            source.minDistance = 5;
-            source.maxDistance = maxRolloffDistance;
-            source.dopplerLevel = 0;
-            return source;
-        }
+        
 
 
         // unclamped versions of Lerp and Inverse Lerp, to allow value to exceed the from-to range
@@ -188,4 +175,39 @@ using Random = UnityEngine.Random;
         {
             return (1.0f - value)*from + value*to;
         }
+
+    private void Start()
+    {
+        /*
+        if (gameObject.GetComponent<controller>().photonView.Owner == GameObject.FindGameObjectWithTag("MainCamera").GetComponent<PhotonView>().Owner)
+        {
+            mainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+            Debug.Log(gameObject.GetComponent<controller>().photonView.Owner);
+        }*/
+        mainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
+       // Debug.Log(gameObject.GetComponent<controller>().photonView.Owner);
     }
+
+    // sets up and adds new audio source to the gane object
+    //[PunRPC]
+    //private AudioSource SetUpEngineAudioSource(AudioClip clip)
+   // private void SetUpEngineAudioSource(AudioClip clip)
+    private AudioSource SetUpEngineAudioSource(AudioClip clip)
+    {
+        // create the new audio source component on the game object and set up its properties
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.clip = clip;
+        source.volume = 0;
+        source.spatialBlend = 1;
+        source.loop = true;
+
+        // start the clip from a random point
+        source.time = Random.Range(0f, clip.length);
+        source.Play();
+        source.minDistance = 5;
+        source.maxDistance = maxRolloffDistance;
+        source.dopplerLevel = 0;
+        return source;
+        //m_HighAccel = source;
+    }
+}

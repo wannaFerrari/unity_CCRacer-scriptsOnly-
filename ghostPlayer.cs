@@ -22,9 +22,14 @@ public class ghostPlayer : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("awake");
+       // Debug.Log("awake");
         // ghost = savedData.data.ghostDatas;
-        if (ghost.savedGhostRecordTime != -1f) { Debug.Log("instat front"); InstantiateGhostCars(); noGhosts = false; }
+        if (ghost.savedGhostRecordTime != -1f) 
+        {   
+            //Debug.Log("instat front"); 
+            InstantiateGhostCars(); 
+            noGhosts = false; 
+        }
         else noGhosts = true;
         timeValue = 0;
         index1= 0;

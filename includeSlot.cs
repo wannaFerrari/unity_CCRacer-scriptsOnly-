@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+//using static UnityEditor.Progress;
 //using static System.Net.Mime.MediaTypeNames;
 
 public class includeSlot : MonoBehaviour, IPointerClickHandler ,IPointerEnterHandler, IPointerExitHandler
