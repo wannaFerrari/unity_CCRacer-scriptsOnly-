@@ -9,6 +9,9 @@ public class startScript : MonoBehaviour
     public AudioClip startSound;
     public AudioClip finishedSound;
     public AudioClip recordSound;
+    public AudioClip multiWinSound;
+    public AudioClip multiLoseSound;
+    public AudioClip multiFinishedSound;
     AudioSource AS;
 
     void Start()
@@ -34,6 +37,24 @@ public class startScript : MonoBehaviour
     public void recordSoundPlay()
     {
         AS.clip = recordSound;
+        AS.Play();
+    }
+
+    public void multiWinSoundPlay()
+    {
+        AS.clip = multiWinSound;
+        AS.Play();
+    }
+
+    public void multiLoseSoundPlay()
+    {
+        AS.clip = multiLoseSound;
+        AS.Play();
+    }
+
+    public void multiFinishedSoundPlay()
+    {
+        AS.clip = multiFinishedSound;
         AS.Play();
     }
 }

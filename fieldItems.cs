@@ -24,6 +24,7 @@ public class fieldItems : MonoBehaviour
         item.downForce= _item.downForce;
         item.description= _item.description;
         item.korParts= _item.korParts;
+        item.itemCode = _item.itemCode;
  
         //Debug.Log(this.GetComponentInParent<Image>());
         // image.sprite = item.itemImage;

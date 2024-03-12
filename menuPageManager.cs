@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using UnityEditor;
 
 public class menuPageManager : MonoBehaviour
 {
@@ -58,17 +59,28 @@ public class menuPageManager : MonoBehaviour
     public GameObject chiWingOn;
     public GameObject chiWingOff;
 
+    [Header("GarageDoor")]
+    public GameObject garageDoor;
+    public float timeValue = 0f;
+    public float positionValue;
+    public bool needStartEffect = true;
+
+    [Header("ButtonControl")]
+    public GameObject modeSelect;
+
 
 
     public AudioClip clickSound;
 
-    [HideInInspector] public int selectedCar;
+    public int selectedCar;
     AudioSource AS2;
 
     Ray ray;
     RaycastHit hit;
     GraphicRaycaster gr;
     public Canvas cv;
+
+    public colorSliderControll colorController;
 
     
 
@@ -77,11 +89,29 @@ public class menuPageManager : MonoBehaviour
         selectedCar = savedData.data.currentCar;
         AS2 = this.GetComponent<AudioSource>();
 
-       gr = cv.GetComponent<GraphicRaycaster>();
+        gr = cv.GetComponent<GraphicRaycaster>();
+        colorController = this.GetComponent<colorSliderControll>();
+    }
 
+    private void FixedUpdate()
+    {
+       // TimeValueChanger();
+        if (needStartEffect) 
+        {
+            TimeValueChanger();
+            GarageDoorOpeningEffect();
+        }
+        //TimeValueChanger();
+       // GarageDoorOpeningEffect();
     }
     private void Start()
     {
+
+        savedData.data.isRaining = false;
+        savedData.data.isOnline = false;
+        Debug.Log("isNewAccount from loginSystem" + ReturnIsNewAccountFromLoginSystem());
+        
+        //GarageDoorOpeningEffect();
         if (ReturnIsNewAccountFromLoginSystem())
         {
             Invoke("dl", 0.1f);
@@ -89,10 +119,35 @@ public class menuPageManager : MonoBehaviour
         }
         else
         {
-            Invoke("LoadClicked", 0.1f);
+            if (savedData.data.CheckNeedUpdate())
+            {
+                Invoke("ReturnedToMenuAfterGame", 0.1f);
+            }
+            
+            //Invoke("LoadClicked", 0.3f);
         }
+        Invoke("LoadClicked", 0.3f);
+        //Invoke("SaveClicked", 0.4f);
+        selectedCar = savedData.data.currentCar;
+        Debug.Log(selectedCar + "----------" + savedData.data.currentCar);
+
+        /*
+        if (savedData.data.currentCar == 0)
+        {
+            colorController.SetColor(savedData.data.supColor.r, savedData.data.supColor.g, savedData.data.supColor.b);
+        }
+        else if (savedData.data.currentCar == 1)
+        {
+            colorController.SetColor(savedData.data.porColor.r, savedData.data.porColor.g, savedData.data.porColor.b);
+        }
+        else if (savedData.data.currentCar == 2)
+        {
+            colorController.SetColor(savedData.data.chiColor.r, savedData.data.chiColor.g, savedData.data.chiColor.b);
+        }
+        */
+        colorController.GetColor();
         //LoadClicked();
-        
+
         //ghostToggle = GetComponent<Toggle>();
     }
     private void Update()
@@ -100,6 +155,15 @@ public class menuPageManager : MonoBehaviour
         updateCarSelected();
         mouseControll();
         WingStatus();
+
+        //////////
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+
+            //dl();
+        }
+        //////////
+
         //Debug.Log(EventSystem.current.IsPointerOverGameObject());
         /*if (EventSystem.current.IsPointerOverGameObject())
         {
@@ -130,7 +194,7 @@ public class menuPageManager : MonoBehaviour
                 //PlayMakerFSM fsm = hit.collider.GetComponent<PlayMakerFSM>();
                 //fsm.SendEvent("이벤트명");
             }*/
-            //EventSystem.current.RaycastAll()
+        //EventSystem.current.RaycastAll()
         //}*/
 
         if ( rotating)
@@ -154,7 +218,8 @@ public class menuPageManager : MonoBehaviour
     {
         clickSoundPlay();
         iButtons.SetActive(false);
-        trackSelect.SetActive(true);
+        //trackSelect.SetActive(true);
+        modeSelect.SetActive(true);
 
     }
 
@@ -162,6 +227,7 @@ public class menuPageManager : MonoBehaviour
     {
         clickSoundPlay();
         //Debug.Log("quit");
+        SaveClicked();
         Application.Quit();
     }
 
@@ -198,6 +264,7 @@ public class menuPageManager : MonoBehaviour
 
     public void supraClicked()
     {
+        clickSoundPlay();
         supPanel.SetActive(true);
         supCarNamePanel.SetActive(true);
         porPanel.SetActive(false);
@@ -211,6 +278,7 @@ public class menuPageManager : MonoBehaviour
     }
     public void porscheClicked()
     {
+        clickSoundPlay();
         //csc.carChanging();
         supPanel.SetActive(false);
         supCarNamePanel.SetActive(false);
@@ -225,6 +293,7 @@ public class menuPageManager : MonoBehaviour
     }
     public void chirionClicked()
     {
+        clickSoundPlay();
         supPanel.SetActive(false);
         supCarNamePanel.SetActive(false);
         porPanel.SetActive(false);
@@ -239,6 +308,7 @@ public class menuPageManager : MonoBehaviour
 
     public void closeBtnClicked()
     {
+        clickSoundPlay();
         //Debug.Log("fffffffffffffffff");
         //float cp;
         //RectTransform ci = carInfoPanel.GetComponent<RectTransform>();
@@ -269,7 +339,8 @@ public class menuPageManager : MonoBehaviour
 
     public void openBtnClicked()
     {
-        if( selectedCar == 0)
+        clickSoundPlay();
+        if ( selectedCar == 0)
         {
             supPanel.SetActive(true);
             supCarNamePanel.SetActive(true);
@@ -292,6 +363,7 @@ public class menuPageManager : MonoBehaviour
     
     public void selectBtnClicked()
     {
+        clickSoundPlay();
         supPanel.SetActive(false);
         supCarNamePanel.SetActive(false);
         porPanel.SetActive(false);
@@ -303,10 +375,12 @@ public class menuPageManager : MonoBehaviour
         openBtn.SetActive(false);
         carInfoPanel.SetActive(false);
         iButtons.SetActive(true);
+        SaveClicked();
     }
 
     public void changeBtnClicked()
     {
+        clickSoundPlay();
         iButtons.SetActive(false);
 
         carInfoPanel.SetActive(true);
@@ -317,6 +391,7 @@ public class menuPageManager : MonoBehaviour
 
     public void ColorChangeBtnClicked()
     {
+        clickSoundPlay();
         csc.GetColor();
         iButtons.SetActive(false);
         colorPanel.SetActive(true);
@@ -324,19 +399,23 @@ public class menuPageManager : MonoBehaviour
 
     public void ColorResetBtnClicked()
     {
+        clickSoundPlay();
         //csc.GetColor();
         csc.ResetColorToDefault();
     }
 
     public void ColorSaveBtnClicked()
     {
+        clickSoundPlay();
         //csc.GetColor();
         colorPanel.SetActive(false);
         iButtons.SetActive(true);
+        SaveClicked();
     }
 
     public void ColorBackBtnClicked()
     {
+        clickSoundPlay();
         //csc.GetColor();
         csc.RecoverBackColor();
         colorPanel.SetActive(false);
@@ -345,6 +424,7 @@ public class menuPageManager : MonoBehaviour
 
     public void ItemPanelOpenBtnClicked()
     {
+        clickSoundPlay();
         mainCanvas.SetActive(false);
         itemCanvas.SetActive(true);
         
@@ -353,6 +433,7 @@ public class menuPageManager : MonoBehaviour
 
     public void ItemBackBtnClicked()
     {
+        clickSoundPlay();
         itemCanvas.SetActive(false);
         mainCanvas.SetActive(true);
         SaveClicked();
@@ -433,7 +514,12 @@ public class menuPageManager : MonoBehaviour
 
     public void dl()
     {
-        this.GetComponent<ItemManager>().RequestDownLoadFromSavedData();
+        Debug.Log("DLDLDLDLDLDLDL");
+        //this.GetComponent<ItemManager>().RequestDownLoadFromSavedData();
+        this.GetComponent<ItemManager>().RequestMakeItems();
+        this.GetComponent<colorSliderControll>().SetColorToInitialColor();
+        ChangeCarAndChangeColorToLastData();
+        SaveClicked();
     }
     /*
     public bool checkGhostAvailable(int track)
@@ -523,11 +609,21 @@ public class menuPageManager : MonoBehaviour
     public void LoadClicked()
     {
         GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<UserDataController>().OnClickLoadButton();
+        Debug.Log(" load clicked");
+        
     }
 
     public void SaveClicked()
     {
         GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<UserDataController>().OnClickSaveButton();
+        Debug.Log(" savedClicked");
+    }
+
+    public void ReturnedToMenuAfterGame()
+    {
+        GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<UserDataController>().DontUpdateInven();
+        GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<UserDataController>().OnClickSaveButton();
+        Debug.Log("returned to menu after game");
     }
     public void ChangeNewAccountToNormalInLoginSystem()
     {
@@ -537,5 +633,79 @@ public class menuPageManager : MonoBehaviour
     public bool ReturnIsNewAccountFromLoginSystem()
     {
         return GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<LoginSystem>().ReturnIsNewAccount();
+    }
+
+    public void GarageDoorOpeningEffect()
+    {
+        //timeValue = 0f;
+        //timeValue += Time.deltaTime;
+        positionValue = garageDoor.GetComponent<RectTransform>().anchoredPosition.y;
+        if(timeValue > 1f && timeValue < 3f)
+        {
+            positionValue += 20f;
+            garageDoor.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, positionValue);
+
+        }
+        else if (timeValue >= 3f)
+        {
+            needStartEffect = false;
+            //garageDoor.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 0f);
+        }
+        else if (timeValue < 1f)
+        {
+            garageDoor.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 0f);
+        }
+
+    }
+
+    public void TimeValueChanger()
+    {
+        timeValue += Time.deltaTime;
+    }
+
+    public void MultiplayClicked() 
+    {
+        clickSoundPlay();
+        //if(checkGhostAvailable(1))
+        this.GetComponent<ItemManager>().RequestUpLoadToSavedData();
+        //loadingSceneController.LoadScene("LongTrack");
+        loadingSceneController.LoadScene("Lobby");
+        Debug.Log("Long clicked");
+    }
+
+    public void BackBtnInModeSelect()
+    {
+        clickSoundPlay();
+        modeSelect.SetActive(false);
+        iButtons.SetActive(true);
+    }
+
+    public void SinglePlayClicked()
+    {
+        clickSoundPlay();
+        loadingSceneController.LoadScene("Single_Lobby");
+    }
+
+    public void ChangeCarAndChangeColorToLastData()
+    {
+        selectedCar = savedData.data.currentCar;
+        
+        if (savedData.data.currentCar == 0)
+        {
+            colorController.SetSlider(savedData.data.supColor.r, savedData.data.supColor.g, savedData.data.supColor.b);
+        }
+        else if (savedData.data.currentCar == 1)
+        {
+            colorController.SetSlider(savedData.data.porColor.r, savedData.data.porColor.g, savedData.data.porColor.b);
+        }
+        else if (savedData.data.currentCar == 2)
+        {
+            colorController.SetSlider(savedData.data.chiColor.r, savedData.data.chiColor.g, savedData.data.chiColor.b);
+        }
+        /*
+
+        colorController.SetColor(savedData.data.supColor.r, savedData.data.supColor.g, savedData.data.supColor.b);
+        colorController.SetColor(savedData.data.porColor.r, savedData.data.porColor.g, savedData.data.porColor.b);
+        colorController.SetColor(savedData.data.chiColor.r, savedData.data.chiColor.g, savedData.data.chiColor.b);*/
     }
 }

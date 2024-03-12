@@ -10,6 +10,9 @@ public class savedData : MonoBehaviour
     public bool activateGhost;
     public bool playerIsPlaying = true;
     public ghost ghostDatas;
+    public ghost rainGhostDatas;
+    public bool isOnline = false;
+    public bool isRaining = false;
 
     public item turbo;
     public item air;
@@ -69,12 +72,23 @@ public class savedData : MonoBehaviour
     public string userNickName = "";
     public int userWin = 0;
     public int userLose = 0;
-    public float UserWinRate = 0;
+    public double UserWinRate = 0;
+
+    [Header("Need Update Datas After Game")]
+    public bool needUpdateData = false;
+
+    [Header("Datas for TimeAttack Records")]
+    public float timeAttackDayTrackClearedTimeFloat = -1f;
+    public float timeAttackNightTrackClearedTimeFloat = -1f;
+    public int timeAttackDayTrackClearedCar;
+    public int timeAttackNightTrackClearedCar;
+    public string timeAttackDayTrackClearedDate;
+    public string timeAttackNightTrackClearedDate;
 
 
 
     public bool isInitial = true;
-    public bool firstSave = true;
+    //public bool firstSave = true;
     // Start is called before the first frame update
     private void Awake()
     {
@@ -188,12 +202,27 @@ public class savedData : MonoBehaviour
         return isInitial;
     }
 
-    public void LoadUserDataToSavedData(string Uid, string Nick, int Win, int Lose, float WinRate)
+    public void LoadUserDataToSavedData(string Uid, string Nick, int Win, int Lose, double WinRate)
     {
         userUid = Uid;
         userNickName = Nick;
         userWin = Win;
         userLose = Lose;
         UserWinRate = WinRate;
+    }
+
+    public void NeedUpdateDatas()
+    {
+        needUpdateData = true;
+    }
+
+    public void DataUpdateCompleted()
+    {
+        needUpdateData = false;
+    }
+
+    public bool CheckNeedUpdate()
+    {
+        return needUpdateData;
     }
 }

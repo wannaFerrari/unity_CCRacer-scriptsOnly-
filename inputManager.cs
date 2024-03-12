@@ -11,6 +11,13 @@ public class inputManager : MonoBehaviour {
     public GameManager GM;
     public bool KeyboardStatus = true;
     public bool MenuStatus = false;
+    public bool isOnline;
+
+    private void Start()
+    {
+        GM = GameObject.FindGameObjectWithTag("gameManager").GetComponent<GameManager>();
+        isOnline = GM.isOnline;
+    }
 
     private void FixedUpdate () {
 
@@ -30,24 +37,27 @@ public class inputManager : MonoBehaviour {
         horizontal = Input.GetAxis ("Horizontal");
         handbrake = (Input.GetAxis ("Jump") != 0) ? true : false;
     }
-
+    
     private void EscKey()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && !isOnline)
         {
            
             if (MenuStatus)
             {
                 MenuStatus = false;
-                Menu.SetActive(false);
+                //Menu.SetActive(false);
+                GM.MenuCanvasClose();
             }
             else
             {
                 MenuStatus = true;
-                Menu.SetActive(true);
+                //Menu.SetActive(true);
+                GM.MenuCanvasOpen();
             }
         }
     }
+    
     private void ResetKey()
     {
         if (Input.GetKeyDown(KeyCode.R))

@@ -270,6 +270,7 @@ public class ItemManager : MonoBehaviour
         to.downForce= from.downForce;
         to.description = from.description;
         to.korParts = from.korParts;
+        to.itemCode = from.itemCode;
 
         return to;
     }
@@ -343,7 +344,7 @@ public class ItemManager : MonoBehaviour
             powerTooltip.transform.position = new Vector3(mx, my);
             powerTooltip.SetActive(true);
             powerName.text = _item.itemName.ToString();
-            powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n토크 " + _item.torque.ToString("+#;-#;0") + "\n무게 " + _item.weight.ToString("+#;-#;0");
+            powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n출력 " + _item.torque.ToString("+#;-#;0") + "\n무게 " + _item.weight.ToString("+#;-#;0");
             powerDes.text = _item.description.ToString();
             
             //Debug.Log(powerTooltip.transform.position);
@@ -411,7 +412,7 @@ public class ItemManager : MonoBehaviour
                 powerTooltip.transform.position = new Vector3(mx, my);
                 powerTooltip.SetActive(true);
                 powerName.text = _item.itemName.ToString();
-                powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n토크 " + _item.torque.ToString("+#;-#;0") + "\n무게 " + _item.weight.ToString(" +#;-#;0");
+                powerValue.text = "장착위치: " + _item.korParts.ToString() + "\n출력 " + _item.torque.ToString("+#;-#;0") + "\n무게 " + _item.weight.ToString(" +#;-#;0");
                 powerDes.text = _item.description.ToString();
             }
         }
@@ -429,6 +430,11 @@ public class ItemManager : MonoBehaviour
     public void RequestDownLoadFromSavedData()
     {
         this.GetComponent<inventory>().DownLoadInvenToSavedData();
+    }
+
+    public void RequestMakeItems()
+    {
+        this.GetComponent<inventory>().InitialMakeItem();
     }
 
     public void PowerBtnClicked()

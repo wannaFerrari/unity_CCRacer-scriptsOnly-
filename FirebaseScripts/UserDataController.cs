@@ -16,7 +16,7 @@ public class UserData
     public string userNickName;
     public int userWin;
     public int userLose;
-    public float userWinRate;
+    public double userWinRate;
 
     public List<item> includedPowerList = new List<item>();
     public List<item> includedDriveList = new List<item>();
@@ -35,9 +35,18 @@ public class UserData
     public float savedAngle = 0f;
     public float savedDownforce = 0f;
 
-    public Color supColor;
-    public Color porColor;
-    public Color chiColor;
+    public Color supColor = new Color(238f/255f, 102f/255f, 255f/255f);
+    public Color porColor = new Color(178f/255f, 255f/255f,0/255f);
+    public Color chiColor = new Color(37f/255f, 93f/255f, 200f/255f);
+
+    public int currentCar;
+
+    public float timeAttackDayTrackClearedTimeFloat = -1f;
+    public float timeAttackNightTrackClearedTimeFloat = -1f;
+    public int timeAttackDayTrackClearedCar;
+    public int timeAttackNightTrackClearedCar;
+    public string timeAttackDayTrackClearedDate;
+    public string timeAttackNightTrackClearedDate;
 
     /*
     public UserData(string userNickName, int userWin, int userLose, float userWinRate)
@@ -74,11 +83,11 @@ public class UserDataController : MonoBehaviour
     public string userNickName;
     public int userWin;
     public int userLose;
-    public float userWinRate;
+    public double userWinRate;
 
     public LoginSystem logSystem;
     public ItemManager itemManager;
-
+    public bool dontUpdateInven;
     
 
     UserData userData = new UserData();
@@ -149,8 +158,12 @@ public class UserDataController : MonoBehaviour
         userData.userWinRate = 0;
         string uid = logSystem.ReturnUserID();
         string jsonData = JsonUtility.ToJson(userData);
+        savedData.data.supColor = userData.supColor;
+        savedData.data.porColor = userData.porColor;
+        savedData.data.chiColor = userData.chiColor;
 
         databaseReference.Child(uid).SetRawJsonValueAsync(jsonData);
+        //OnClickSaveButton();
     }
     
     public void OnClickSaveButton()
@@ -250,24 +263,34 @@ public class UserDataController : MonoBehaviour
                // text.gameObject.SetActive(false);
                 //text.gameObject.SetActive(true);
 
-                UpdateSavedData();
+                UpdateSavedData(uid);
 
+
+
+
+                /*
                 inventory.instance.DownLoadInvenToSavedData();
                 for (int i = 0; i < userData.includedPowerList.Count; i++)
                 {
-                    itemManager.CheckToInclude(userData.includedPowerList[i]);
+                    itemManager.CheckToInclude(itemDatabase.instance.itemDB[userData.includedPowerList[i].itemCode]);
                 }
                 for (int i = 0; i < userData.includedDriveList.Count; i++)
                 {
-                    itemManager.CheckToInclude(userData.includedDriveList[i]);
+                    itemManager.CheckToInclude(itemDatabase.instance.itemDB[userData.includedDriveList[i].itemCode]);
                 }
                 for (int i = 0; i < userData.includedSpecialList.Count; i++)
                 {
-                    itemManager.CheckToInclude(userData.includedSpecialList[i]);
+                    itemManager.CheckToInclude(itemDatabase.instance.itemDB[userData.includedSpecialList[i].itemCode]);
                 }
                 //Debug.Log(dataSnapshot.email)
                 savedData.data.LoadUserDataToSavedData(uid, userNickName, userWin, userLose, userWinRate);
                 //SceneManager.LoadScene("GarageScene");
+                */
+
+
+
+
+
             }
         });
         
@@ -279,12 +302,21 @@ public class UserDataController : MonoBehaviour
         userData.includedPowerList = savedData.data.includedPowerList;
         userData.includedDriveList = savedData.data.includedDriveList;
         userData.includedSpecialList = savedData.data.includedSpecialList;
-        inventory.instance.UpLoadInvenToSavedData();
+        if (dontUpdateInven)
+        {
+            dontUpdateInven = false;
+        }
+        else
+        {
+            inventory.instance.UpLoadInvenToSavedData();
 
+            Debug.Log("else문에서 uploadInventoSavedData 호출");
+        }
+        
         userData.PowerInventoryList = savedData.data.PowerInventoryList;
         userData.DriveInventoryList = savedData.data.DriveInventoryList;
         userData.SpecialInventoryList = savedData.data.SpecialInventoryList;
-        Debug.Log(userData.PowerInventoryList.Count);
+        Debug.Log("else 이후 호출" + userData.PowerInventoryList.Count);
 
         userData.savedTorque = savedData.data.savedTorque;
         userData.savedBrake = savedData.data.savedBrake;
@@ -304,9 +336,21 @@ public class UserDataController : MonoBehaviour
         userData.userLose = savedData.data.userLose;
         userData.userWinRate = savedData.data.UserWinRate;
 
+        userData.currentCar = savedData.data.currentCar;
+
+        userData.timeAttackDayTrackClearedTimeFloat = savedData.data.timeAttackDayTrackClearedTimeFloat;
+        userData.timeAttackNightTrackClearedTimeFloat = savedData.data.timeAttackNightTrackClearedTimeFloat;
+        userData.timeAttackDayTrackClearedCar = savedData.data.timeAttackDayTrackClearedCar;
+        userData.timeAttackNightTrackClearedCar = savedData.data.timeAttackNightTrackClearedCar;
+        userData.timeAttackDayTrackClearedDate = savedData.data.timeAttackDayTrackClearedDate;
+        userData.timeAttackNightTrackClearedDate = savedData.data.timeAttackNightTrackClearedDate;
+
+        savedData.data.DataUpdateCompleted();
+        
+
     }
 
-    public void UpdateSavedData()
+    public void UpdateSavedData(string uid)
     {
         itemManager = GameObject.FindGameObjectWithTag("MenuPageManager").GetComponent<ItemManager>();
         savedData.data.includedPowerList = userData.includedPowerList;
@@ -338,6 +382,46 @@ public class UserDataController : MonoBehaviour
         savedData.data.userWin = userData.userWin;  
         savedData.data.userLose = userData.userLose;
         savedData.data.UserWinRate = userData.userWinRate;
+        savedData.data.currentCar = userData.currentCar;
+        Debug.Log(savedData.data.currentCar);
+
+
+
+        savedData.data.timeAttackDayTrackClearedTimeFloat = userData.timeAttackDayTrackClearedTimeFloat;
+        savedData.data.timeAttackNightTrackClearedTimeFloat = userData.timeAttackNightTrackClearedTimeFloat;
+        savedData.data.timeAttackDayTrackClearedCar = userData.timeAttackDayTrackClearedCar;
+        savedData.data.timeAttackNightTrackClearedCar = userData.timeAttackNightTrackClearedCar;
+        savedData.data.timeAttackDayTrackClearedDate = userData.timeAttackDayTrackClearedDate;
+        savedData.data.timeAttackNightTrackClearedDate = userData.timeAttackNightTrackClearedDate;
+
+
+
+        inventory.instance.DownLoadInvenToSavedData();
+        for (int i = 0; i < userData.includedPowerList.Count; i++)
+        {
+            itemManager.CheckToInclude(itemDatabase.instance.itemDB[userData.includedPowerList[i].itemCode]);
+        }
+        for (int i = 0; i < userData.includedDriveList.Count; i++)
+        {
+            itemManager.CheckToInclude(itemDatabase.instance.itemDB[userData.includedDriveList[i].itemCode]);
+        }
+        for (int i = 0; i < userData.includedSpecialList.Count; i++)
+        {
+            itemManager.CheckToInclude(itemDatabase.instance.itemDB[userData.includedSpecialList[i].itemCode]);
+        }
+        //Debug.Log(dataSnapshot.email)
+        savedData.data.LoadUserDataToSavedData(uid, userNickName, userWin, userLose, userWinRate);
+
+
+
+
+        menuPageManager mpm = GameObject.FindGameObjectWithTag("MenuPageManager").GetComponent<menuPageManager>();
+        mpm.ChangeCarAndChangeColorToLastData();
+        mpm.colorController.MenuLoaded();
+    }
+    public void DontUpdateInven()
+    {
+        dontUpdateInven = true;
     }
     // Start is called before the first frame update
 

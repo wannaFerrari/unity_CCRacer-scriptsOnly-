@@ -25,6 +25,8 @@ public class carEffects : MonoBehaviourPun
         skidClip = gameObject.transform.Find("CarEffectAudioSource").transform.Find("skid").gameObject.GetComponent<AudioSource>();
         crashClip = gameObject.transform.Find("CarEffectAudioSource").transform.Find("collide").gameObject.GetComponent<AudioSource>();
         scratchClip = gameObject.transform.Find("CarEffectAudioSource").transform.Find("friction").gameObject.GetComponent<AudioSource>();
+        brakeLights.DisableKeyword("_EMISSION");
+        brakeLights.EnableKeyword("_EMISSION");
 
     }
 
@@ -55,6 +57,7 @@ public class carEffects : MonoBehaviourPun
             emission.rateOverTime = ((int) controller.KPH *2 >= 2000) ? (int) controller.KPH * 2 : 2000;
             smoke[i].Play();
         }
+        skidClip.Play();
         smokeFlag = true;
 
     }
@@ -64,6 +67,7 @@ public class carEffects : MonoBehaviourPun
         for (int i = 0; i < smoke.Length; i++){
             smoke[i].Stop();
         }
+        skidClip.Stop();
         smokeFlag = false;
     }
    

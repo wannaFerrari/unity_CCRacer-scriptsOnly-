@@ -5,7 +5,7 @@ using UnityEngine;
 public class BGM : MonoBehaviour
 {
 
-    public AudioClip[] Music = new AudioClip[3]; // 사용할 BGM
+    public AudioClip[] Music; // 사용할 BGM
    // public AudioClip BGM1;
     AudioSource AS;
     public int currentMusicNum = -1;
@@ -97,6 +97,13 @@ public class BGM : MonoBehaviour
 
     public string ReturnMusicName()
     {
-        return Music[currentMusicNum].name;
+        if (currentMusicNum == -1)
+        {
+            return "Is Not Playing";
+        }
+        else
+        {
+            return Music[currentMusicNum].name;
+        }
     }
 }

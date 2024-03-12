@@ -397,6 +397,171 @@ public class RPC_CheckLoad : MonoBehaviourPunCallbacks
     }
 
     [PunRPC]
+    public void SetColorToServerSingle(int actorNumber1, int carSelected1, float colorR1, float colorG1, float colorB1)
+    {
+        GameObject[] objects = GameObject.FindGameObjectsWithTag("Player");
+        Debug.Log(objects.Length + "---- objects.length");
+
+        GameObject[] findSu = GameObject.FindGameObjectsWithTag("supraColor");
+        List<GameObject> su = new List<GameObject>();
+        List<GameObject> su2 = new List<GameObject>();
+        Debug.Log(findSu.Length);
+
+        for (int j = 0; j < findSu.Length; j++)
+        {
+            if (findSu[j].gameObject.transform.root.transform.GetComponentInChildren<PhotonView>().GetComponent<PhotonView>().OwnerActorNr == actorNumber1)
+            {
+                su.Add(findSu[j]);
+                Debug.Log(findSu[j] + "-------------" + j);
+            }
+            
+        }
+        Debug.Log(su.Count + " --su count--" + su2.Count);
+
+
+
+        GameObject[] findPo = GameObject.FindGameObjectsWithTag("porColor");
+        List<GameObject> po = new List<GameObject>();
+        List<GameObject> po2 = new List<GameObject>();
+        for (int j = 0; j < findPo.Length; j++)
+        {
+            if (findPo[j].gameObject.transform.root.transform.GetComponentInChildren<PhotonView>().GetComponent<PhotonView>().OwnerActorNr == actorNumber1)
+            {
+                po.Add(findPo[j]);
+            }
+            
+        }
+
+
+
+        GameObject[] findCh = GameObject.FindGameObjectsWithTag("chiColor");
+        List<GameObject> ch = new List<GameObject>();
+        List<GameObject> ch2 = new List<GameObject>();
+        for (int j = 0; j < findCh.Length; j++)
+        {
+            if (findCh[j].gameObject.transform.root.transform.GetComponentInChildren<PhotonView>().GetComponent<PhotonView>().OwnerActorNr == actorNumber1)
+            {
+                ch.Add(findCh[j]);
+            }
+            
+        }
+
+        for (int i = 0; i < objects.Length; i++)
+        {
+            Debug.Log(objects[i].GetComponent<PhotonView>().OwnerActorNr + " objects[i] number" + i);
+            if (objects[i].GetComponent<PhotonView>().OwnerActorNr == actorNumber1)
+            {
+                if (carSelected1 == 0)
+                {
+                    sup1.color = new Color(colorR1 / 255f, colorG1 / 255f, colorB1 / 255f);
+                    /*
+                    GameObject[] findSu = GameObject.FindGameObjectsWithTag("supraColor");
+                    List<GameObject> su = new List<GameObject>();
+                    
+                    for (int j = 0; j < findSu.Length-1; j++)
+                    {
+                        if (findSu[j].gameObject.GetComponent<PhotonView>().OwnerActorNr == actorNumber1)
+                        {
+                            su.Add(findSu[j]);
+                        }
+                    }*/
+
+
+                    Material[] m0 = su[0].GetComponent<MeshRenderer>().materials;
+                    m0[2] = sup1;
+                    su[0].GetComponent<MeshRenderer>().materials = m0;
+
+                    Material[] m1 = su[1].GetComponent<MeshRenderer>().materials;
+                    m1[3] = sup1;
+                    su[1].GetComponent<MeshRenderer>().materials = m1;
+
+                    Material[] m2 = su[2].GetComponent<MeshRenderer>().materials;
+                    m2[3] = sup1;
+                    su[2].GetComponent<MeshRenderer>().materials = m2;
+
+                    Material[] m3 = su[3].GetComponent<MeshRenderer>().materials;
+                    m3[3] = sup1;
+                    su[3].GetComponent<MeshRenderer>().materials = m3;
+
+                    Material[] m4 = su[4].GetComponent<MeshRenderer>().materials;
+                    m4[3] = sup1;
+                    su[4].GetComponent<MeshRenderer>().materials = m4;
+
+                    Material[] m5 = su[5].GetComponent<MeshRenderer>().materials;
+                    m5[9] = sup1;
+                    su[5].GetComponent<MeshRenderer>().materials = m5;
+
+                    Material[] m6 = su[6].GetComponent<MeshRenderer>().materials;
+                    m6[8] = sup1;
+                    su[6].GetComponent<MeshRenderer>().materials = m6;
+
+                    Material[] m7 = su[7].GetComponent<MeshRenderer>().materials;
+                    m7[1] = sup1;
+                    su[7].GetComponent<MeshRenderer>().materials = m7;
+
+                }
+                else if (carSelected1 == 1)
+                {
+                    por1.color = new Color(colorR1 / 255f, colorG1 / 255f, colorB1 / 255f);
+                    /*
+                    GameObject[] findPo = GameObject.FindGameObjectsWithTag("porColor");
+                    List<GameObject> po = new List<GameObject>();
+                    List<GameObject> po2 = new List<GameObject>();
+                    for (int j = 0; j < findSu.Length - 1; j++)
+                    {
+                        if (findSu[j].gameObject.GetComponent<PhotonView>().OwnerActorNr == actorNumber1)
+                        {
+                            po.Add(findSu[j]);
+                        }
+                        else if (findSu[j].gameObject.GetComponent<PhotonView>().OwnerActorNr == actorNumber2)
+                        {
+                            po2.Add(findSu[j]);
+                        }
+                    }
+                    */
+
+                    Material[] m0 = po[0].GetComponent<MeshRenderer>().materials;
+                    m0[0] = por1;
+                    po[0].GetComponent<MeshRenderer>().materials = m0;
+                }
+                else if (carSelected1 == 2)
+                {
+                    chi1.color = new Color(colorR1 / 255f, colorG1 / 255f, colorB1 / 255f);
+                    // GameObject[] ch = GameObject.FindGameObjectsWithTag("chiColor");
+
+                    Material[] m0 = ch[0].GetComponent<MeshRenderer>().materials;
+                    m0[0] = chi1;
+                    ch[0].GetComponent<MeshRenderer>().materials = m0;
+
+                    Material[] m1 = ch[1].GetComponent<MeshRenderer>().materials;
+                    m1[0] = chi1;
+                    ch[1].GetComponent<MeshRenderer>().materials = m1;
+
+                    Material[] m2 = ch[2].GetComponent<MeshRenderer>().materials;
+                    m2[0] = chi1;
+                    ch[2].GetComponent<MeshRenderer>().materials = m2;
+
+                    Material[] m3 = ch[3].GetComponent<MeshRenderer>().materials;
+                    m3[0] = chi1;
+                    ch[3].GetComponent<MeshRenderer>().materials = m3;
+
+                    Material[] m4 = ch[4].GetComponent<MeshRenderer>().materials;
+                    m4[0] = chi1;
+                    ch[4].GetComponent<MeshRenderer>().materials = m4;
+
+                    Material[] m5 = ch[5].GetComponent<MeshRenderer>().materials;
+                    m5[0] = chi1;
+                    ch[5].GetComponent<MeshRenderer>().materials = m5;
+                }
+            }
+
+
+            
+        }
+
+    }
+
+    [PunRPC]
     public void ColorLoaded()
     {
         colorFinishedUser++;

@@ -7,6 +7,7 @@ using System;
 using Photon.Pun;
 using TMPro;
 using Photon.Realtime;
+using JetBrains.Annotations;
 
 public class GameManager : MonoBehaviourPunCallbacks
 {
@@ -31,7 +32,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public Text kph;
     public Text currentPosition;
     public Text gearNum;
-    private float startPosiziton = 174f, endPosition = -90f;   //32f ,  -211f
+    private float startPosiziton = 170f, endPosition = -85f;   //32f ,  -211f
     private float desiredPosition;
 
     private int count4 = 0;
@@ -44,6 +45,8 @@ public class GameManager : MonoBehaviourPunCallbacks
     private int currentLap = -1;
 
     private bool Finished = false;
+
+    private bool allStop = false;
 
     public startScript startScript;
     private float finishCounter = 0;
@@ -94,6 +97,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     public GameObject SupraBanner;
     public GameObject PorscheBanner;
     public GameObject ChironBanner;
+    public GameObject OtherInfoBanner;
 
     [Header("Selected Car")]
     public GameObject Supra;
@@ -155,6 +159,13 @@ public class GameManager : MonoBehaviourPunCallbacks
     public TextMeshProUGUI loseInLose;
     public TextMeshProUGUI rateInLose;
 
+    [Header("othersInfoPanel")]
+    public Sprite[] carLogoArr;
+    public Image otherImage;
+    public Image otherLogo;
+    public TextMeshProUGUI otherBrand;
+    public TextMeshProUGUI otherCar;
+
     [Header("RPC Object")]
     public GameObject rpcOb;
     public bool readyFlag = false;
@@ -168,17 +179,33 @@ public class GameManager : MonoBehaviourPunCallbacks
     public bool isAllPlayerLoaded = false;
     public bool isAllPlayersColorLoaded = false;
 
-    private RectTransform timaAttackBanner, carInfoBanner;
+    private RectTransform timaAttackBanner, carInfoBanner, otherBanner;
 
     public string timerToSend = "";
 
     private bool countdownFlag = false;
+
+    [Header("WaitingBanner")]
+    public GameObject waitingBanner;
+
+    [Header("Rain Effect and Light")]
+    public GameObject rainEffect;
+    public GameObject headLight;
+
+    [Header("Menu Canvas")]
+    public GameObject menuCanvas;
+
+    [Header("isClientUserWon")]
+    private bool isWonTheGame ;
+
     private void Awake () {
         if(Instance != this)
         {
             Destroy(gameObject);
         }
         selectedCarNum = savedData.data.currentCar;
+        isOnline = savedData.data.isOnline;
+        /*
         savedData.data.ghostDatas.currentCar = selectedCarNum;
         activateGhostCars = savedData.data.activateGhost;
         //Debug.Log(activateGhostCars);
@@ -186,14 +213,20 @@ public class GameManager : MonoBehaviourPunCallbacks
        // Debug.Log(savedData.data.ghostDatas.savedGhostRecordTime);
         savedData.data.ghostDatas.isGhost = true;
         savedData.data.ghostDatas.isPlay = true;
+        */
         //Instantiate(zz, savedData.data.ghostDatas.savedGhostPosition[0], Quaternion.identity);
         if (isOnline)
         {
 
 
 
-            Vector3 spawnPos = spawnPosition[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position;
-            Quaternion spawnRot = spawnPosition[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.rotation;
+            //Vector3 spawnPos = spawnPosition[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position;
+            //Quaternion spawnRot = spawnPosition[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.rotation;
+            
+            //Vector3 spawnPos = spawnPosition[(PhotonNetwork.LocalPlayer.ActorNumber >= 2) ? 1 : 0 ].transform.position;
+            //Quaternion spawnRot = spawnPosition[(PhotonNetwork.LocalPlayer.ActorNumber >= 2) ? 1 : 0].transform.rotation;
+            Vector3 spawnPos = spawnPosition[(PhotonNetwork.LocalPlayer.ToString() == PhotonNetwork.PlayerList[0].ToString()) ? 0 : 1].transform.position;
+            Quaternion spawnRot = spawnPosition[(PhotonNetwork.LocalPlayer.ToString() == PhotonNetwork.PlayerList[0].ToString()) ? 0 : 1].transform.rotation;
             GameObject Player = PhotonNetwork.Instantiate(PlayerPrefab[(int)PhotonNetwork.LocalPlayer.CustomProperties["selectedCar"]].name, spawnPos, spawnRot);
             if (Player.transform.GetChild(1).gameObject.GetPhotonView().IsMine)
             {
@@ -215,6 +248,18 @@ public class GameManager : MonoBehaviourPunCallbacks
                 Player.transform.GetChild(1).transform.Find("trigger").gameObject.SetActive(true);
                 Player.transform.GetChild(1).transform.Find("minimapCam").GetComponent<Camera>().enabled = true;
                 Player.transform.GetChild(1).transform.Find("PlayerUICanvas").gameObject.SetActive(true);
+
+                // --------Rain Effect and Light
+                if (savedData.data.isRaining)
+                {
+                    Player.transform.GetChild(1).transform.Find("Rain").gameObject.SetActive(true);
+                    Player.transform.GetChild(1).transform.Find("Lights").gameObject.SetActive(true);
+
+                    
+                }
+               
+
+
 
                 GameObject[] gg = GameObject.FindGameObjectsWithTag("supraColor");
                 for(int i =0; i < gg.Length; i++)
@@ -280,6 +325,159 @@ public class GameManager : MonoBehaviourPunCallbacks
 
                 //Player.transform.GetChild(1).gameObject.GetComponent<controller>().enabled = true;
             }
+
+            
+
+        }
+        else // offline
+        {
+
+            //Vector3 spawnPos = spawnPosition[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.position;
+            //Quaternion spawnRot = spawnPosition[PhotonNetwork.LocalPlayer.ActorNumber - 1].transform.rotation;
+            Vector3 spawnPos = spawnPosition[0].transform.position;
+            Quaternion spawnRot = spawnPosition[0].transform.rotation;
+            GameObject Player = PhotonNetwork.Instantiate(PlayerPrefab[(int)PhotonNetwork.LocalPlayer.CustomProperties["selectedCar"]].name, spawnPos, spawnRot);
+            if (Player.transform.GetChild(1).gameObject.GetPhotonView().IsMine)
+            {
+                Player.transform.Find("Main Camera").GetComponent<Camera>().enabled = true;
+                Player.transform.Find("Main Camera").GetComponent<AudioListener>().enabled = true;
+                Player.transform.Find("Main Camera").GetComponent<BGM>().enabled = true;
+                Player.transform.Find("Main Camera").GetComponent<AudioSource>().enabled = true;
+                Player.transform.Find("Main Camera").transform.Find("soundBox").GetComponent<AudioSource>().enabled = true;
+                Player.transform.Find("Main Camera").transform.Find("soundBox").GetComponent<startScript>().enabled = true;
+                bgmScript = Player.transform.Find("Main Camera").GetComponent<BGM>();
+
+                Player.transform.GetChild(1).gameObject.GetComponent<inputManager>().enabled = true;
+                Player.transform.GetChild(1).gameObject.GetComponent<carEffects>().enabled = true;
+                Player.transform.GetChild(1).gameObject.GetComponent<audio>().enabled = true;
+                Player.transform.GetChild(1).gameObject.GetComponent<controller>().enabled = true;
+                //
+                Player.transform.GetChild(1).gameObject.GetComponent<ghostRecorder>().enabled = true;
+                //
+                Player.transform.GetChild(1).transform.Find("CarEffectAudioSource").transform.Find("skid").gameObject.GetComponent<AudioSource>().enabled = true;
+                Player.transform.GetChild(1).transform.Find("CarEffectAudioSource").transform.Find("collide").gameObject.GetComponent<AudioSource>().enabled = true;
+                Player.transform.GetChild(1).transform.Find("CarEffectAudioSource").transform.Find("friction").gameObject.GetComponent<AudioSource>().enabled = true;
+                Player.transform.GetChild(1).transform.Find("trigger").gameObject.SetActive(true);
+                Player.transform.GetChild(1).transform.Find("minimapCam").GetComponent<Camera>().enabled = true;
+                Player.transform.GetChild(1).transform.Find("PlayerUICanvas").gameObject.SetActive(true);
+
+                // --------Rain Effect and Light
+                if (savedData.data.isRaining)
+                {
+                    Player.transform.GetChild(1).transform.Find("Rain").gameObject.SetActive(true);
+                    Player.transform.GetChild(1).transform.Find("Lights").gameObject.SetActive(true);
+                }
+
+
+
+                /*
+                GameObject[] gg = GameObject.FindGameObjectsWithTag("supraColor");
+                for (int i = 0; i < gg.Length; i++)
+                {
+                    Debug.Log(gg[i].name);
+                }*/
+
+                rpcOb = GameObject.FindGameObjectWithTag("CheckUsers");
+                PhotonView pv = rpcOb.GetComponent<PhotonView>();
+                pv.RPC("AddOrEjectWings", RpcTarget.All, PhotonNetwork.LocalPlayer.ActorNumber,
+                    (int)PhotonNetwork.LocalPlayer.CustomProperties["selectedCar"], (float)PhotonNetwork.LocalPlayer.CustomProperties["wings"]);
+
+                /*
+                Color c1 = new Color((float)PhotonNetwork.PlayerList[0].CustomProperties["colorR"], (float)PhotonNetwork.PlayerList[0].CustomProperties["colorG"],
+                    (float)PhotonNetwork.PlayerList[0].CustomProperties["colorB"]);
+
+                Color c2 = new Color((float)PhotonNetwork.PlayerList[1].CustomProperties["colorR"], (float)PhotonNetwork.PlayerList[1].CustomProperties["colorG"],
+                    (float)PhotonNetwork.PlayerList[1].CustomProperties["colorB"]);*/
+
+                /*
+                pv.RPC("SetColorToServer", RpcTarget.All, PhotonNetwork.PlayerList[0].ActorNumber, (int)PhotonNetwork.PlayerList[0].CustomProperties["selectedCar"],
+                    (Color)PhotonNetwork.PlayerList[0].CustomProperties["color"], PhotonNetwork.PlayerList[1].ActorNumber, (int)PhotonNetwork.PlayerList[1].CustomProperties["selectedCar"],
+                    (Color)PhotonNetwork.PlayerList[1].CustomProperties["color"]);*/
+                /*---
+                pv.RPC("SetColorToServer", RpcTarget.All, PhotonNetwork.PlayerList[0].ActorNumber, (int)PhotonNetwork.PlayerList[0].CustomProperties["selectedCar"],
+                    c1, PhotonNetwork.PlayerList[1].ActorNumber, (int)PhotonNetwork.PlayerList[1].CustomProperties["selectedCar"],
+                    c2);
+                */
+
+                /*
+                if ((float)PhotonNetwork.LocalPlayer.CustomProperties["wings"] == 0)
+                {
+                    if ((int)PhotonNetwork.LocalPlayer.CustomProperties["selectedCar"] == 2)
+                    {
+                        Player.transform.GetChild(1).transform.Find("spoiler").gameObject.SetActive(false);
+                        Player.transform.GetChild(1).transform.Find("closedSpoiler").gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        Player.transform.GetChild(1).transform.Find("spoiler").gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    if ((int)PhotonNetwork.LocalPlayer.CustomProperties["selectedCar"] == 2)
+                    {
+                        Player.transform.GetChild(1).transform.Find("spoiler").gameObject.SetActive(true);
+                        Player.transform.GetChild(1).transform.Find("closedSpoiler").gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        Player.transform.GetChild(1).transform.Find("spoiler").gameObject.SetActive(true);
+                    }
+                }
+                */
+
+
+                //curRoomUserCount++;
+
+                //Player.transform.GetChild(1).gameObject.GetComponents<AudioSource>()[0].enabled = true;
+                //Player.transform.GetChild(1).gameObject.GetComponents<AudioSource>()[1].enabled = true;
+                //Player.transform.GetChild(1).gameObject.GetComponents<AudioSource>()[2].enabled = true;
+
+                //Player.transform.GetChild(1).gameObject.GetComponent<controller>().enabled = true;
+
+
+                //savedData.data.ghostDatas.currentCar = selectedCarNum;
+                if (savedData.data.isRaining)
+                {
+                    savedData.data.rainGhostDatas.currentCar = (int)PhotonNetwork.LocalPlayer.CustomProperties["selectedCar"];
+                    activateGhostCars = savedData.data.activateGhost;
+                    //Debug.Log(activateGhostCars);
+
+                    // Debug.Log(savedData.data.ghostDatas.savedGhostRecordTime);
+                    savedData.data.rainGhostDatas.isGhost = true;
+                    savedData.data.rainGhostDatas.isPlay = true;
+                }
+                else
+                {
+                    savedData.data.ghostDatas.currentCar = (int)PhotonNetwork.LocalPlayer.CustomProperties["selectedCar"];
+                    activateGhostCars = savedData.data.activateGhost;
+                    //Debug.Log(activateGhostCars);
+
+                    // Debug.Log(savedData.data.ghostDatas.savedGhostRecordTime);
+                    savedData.data.ghostDatas.isGhost = true;
+                    savedData.data.ghostDatas.isPlay = true;
+                }
+                /*
+                savedData.data.ghostDatas.currentCar = (int)PhotonNetwork.LocalPlayer.CustomProperties["selectedCar"];
+                activateGhostCars = savedData.data.activateGhost;
+                //Debug.Log(activateGhostCars);
+
+                // Debug.Log(savedData.data.ghostDatas.savedGhostRecordTime);
+                savedData.data.ghostDatas.isGhost = true;
+                savedData.data.ghostDatas.isPlay = true;*/
+            }
+            else
+            {
+                if (savedData.data.isRaining)
+                {
+                    //Player.transform.GetChild(1).transform.Find("Rain").gameObject.SetActive(true);
+                    Player.transform.GetChild(1).transform.Find("Lights").gameObject.SetActive(true);
+                }
+            }
+
+
+            gRecorder = GameObject.FindGameObjectWithTag("Player").GetComponent<ghostRecorder>();
+
         }
 
 
@@ -290,7 +488,7 @@ public class GameManager : MonoBehaviourPunCallbacks
         //setGhosts();
         RR = GameObject.FindGameObjectWithTag ("Player").GetComponent<controller> ();
         car = GameObject.FindGameObjectWithTag("Player");
-        gRecorder = GameObject.FindGameObjectWithTag("Player").GetComponent<ghostRecorder>();
+        //gRecorder = GameObject.FindGameObjectWithTag("Player").GetComponent<ghostRecorder>();
         
         //selectedCarNum = savedData
         selectedCarNum = savedData.data.currentCar;
@@ -330,7 +528,8 @@ public class GameManager : MonoBehaviourPunCallbacks
         GL3 = GameObject.Find("PlayerUICanvas").transform.Find("signContainer").transform.Find("GreenLight3").gameObject;
         GL4 = GameObject.Find("PlayerUICanvas").transform.Find("signContainer").transform.Find("GreenLight4").gameObject;
         MyNickname = GameObject.Find("PlayerUICanvas").transform.Find("MyNickname").gameObject;
-        
+        waitingBanner = GameObject.Find("PlayerUICanvas").transform.Find("waitingBanner").gameObject;
+
         // ---------------- music(BGM)
         musicPlayerUI = GameObject.Find("PlayerUICanvas").transform.Find("Music").gameObject;
         pauseMusicBtn = musicPlayerUI.transform.Find("Panel").transform.Find("pause").gameObject;
@@ -362,10 +561,17 @@ public class GameManager : MonoBehaviourPunCallbacks
         loseInLose = resultPanel.transform.Find("recordPanel").transform.Find("loserPanel").transform.Find("loseInLose").gameObject.GetComponent<TextMeshProUGUI>();
         rateInLose = resultPanel.transform.Find("recordPanel").transform.Find("loserPanel").transform.Find("rateInLose").gameObject.GetComponent<TextMeshProUGUI>();
 
+        
+
         MyNickname.GetComponent<TextMeshProUGUI>().text = PhotonNetwork.LocalPlayer.NickName;
 
         SpawnPoint = GameObject.Find("checkPoint");
         TimeAttackBanner = GameObject.Find("PlayerUICanvas").transform.Find("TimeAttackBanner").gameObject;
+        OtherInfoBanner = GameObject.Find("PlayerUICanvas").transform.Find("OtherUserBanner").gameObject;
+        otherImage = OtherInfoBanner.transform.Find("Panel").transform.Find("otherImage").gameObject.GetComponent<Image>();
+        otherLogo = OtherInfoBanner.transform.Find("Panel").transform.Find("otherLogo").gameObject.GetComponent<Image>();
+        otherBrand = OtherInfoBanner.transform.Find("Panel").transform.Find("otherBrand").gameObject.GetComponent<TextMeshProUGUI>();
+        otherCar = OtherInfoBanner.transform.Find("Panel").transform.Find("otherCar").gameObject.GetComponent<TextMeshProUGUI>();
         SupraBanner = GameObject.Find("PlayerUICanvas").transform.Find("SupraBanner").gameObject;
         PorscheBanner = GameObject.Find("PlayerUICanvas").transform.Find("PorscheBanner").gameObject;
         ChironBanner = GameObject.Find("PlayerUICanvas").transform.Find("ChironBanner").gameObject;
@@ -394,9 +600,22 @@ public class GameManager : MonoBehaviourPunCallbacks
                 {
                     //SetCarColors();
                 }*/
+                if (Finished)
+                {
+                    finishedTimer();
+                }
+                else
+                {
+                    kph.text = RR.KPH.ToString("0"); //숫자만
+                    waitingBanner.SetActive(false);
+                    updateNeedle();
+                    UpdateMusicName();
+                }
+                /*
                 kph.text = RR.KPH.ToString("0"); //숫자만
+                waitingBanner.SetActive(false);
                 updateNeedle();
-                UpdateMusicName();
+                UpdateMusicName();*/
 
                 if (!RR.photonView.IsMine)
                 {
@@ -417,12 +636,58 @@ public class GameManager : MonoBehaviourPunCallbacks
                 if (m_Text && m_IsPlaying)
                     m_Text.text = m_Timer;
 
-                
+                /*
                 if (Finished)
                 {
                     finishedTimer();
-                }
+                }*/
             }
+        }
+        else
+        {
+
+            if (Finished)
+            {
+                finishedTimer();
+            }
+            else
+            {
+                kph.text = RR.KPH.ToString("0"); //숫자만
+                waitingBanner.SetActive(false);
+                updateNeedle();
+                UpdateMusicName();
+            }
+            /*
+            kph.text = RR.KPH.ToString("0"); //숫자만
+            waitingBanner.SetActive(false);
+            updateNeedle();
+            UpdateMusicName();*/
+
+            if (!RR.photonView.IsMine)
+            {
+                mainCanvas.SetActive(false);
+            }
+
+            if (!isStarted)
+            {
+                coundDownTimer();
+                moveBanner();
+            }
+
+            if (m_IsPlaying)
+            {
+                m_Timer = StockwatchTimer();
+            }
+
+            if (m_Text && m_IsPlaying)
+                m_Text.text = m_Timer;
+
+            /*
+            if (Finished)
+            {
+                finishedTimer();
+            }*/
+        
         }
         
 
@@ -430,7 +695,32 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void CheckPlayersLoad()
     {
-        if(PhotonNetwork.PlayerList.Length == GameObject.FindGameObjectWithTag("CheckUsers").GetComponent<RPC_CheckLoad>().loadedUser)
+        if (isOnline)
+        {
+            if (PhotonNetwork.PlayerList.Length == GameObject.FindGameObjectWithTag("CheckUsers").GetComponent<RPC_CheckLoad>().loadedUser)
+            {
+                //SetCarColors();
+                //isAllPlayerLoaded = true;
+                //readyFlag = true;
+                if (savedData.data.isRaining)
+                {
+                    GameObject[] players;
+                    players = GameObject.FindGameObjectsWithTag("Player");
+                    for (int i = 0; i < players.Length; i++)
+                    {
+                        if (!players[i].GetPhotonView().IsMine)
+                        {
+                            players[i].transform.Find("Lights").gameObject.SetActive(true);
+                        }
+                    }
+                }
+                SetCarColors();
+                isAllPlayerLoaded = true;
+                readyFlag = true;
+
+            }
+        }
+        else
         {
             SetCarColors();
             isAllPlayerLoaded = true;
@@ -440,7 +730,14 @@ public class GameManager : MonoBehaviourPunCallbacks
 
     public void CheckPlayersColorLoad()
     {
-        if (PhotonNetwork.PlayerList.Length == GameObject.FindGameObjectWithTag("CheckUsers").GetComponent<RPC_CheckLoad>().colorFinishedUser)
+        if (isOnline)
+        {
+            if (PhotonNetwork.PlayerList.Length == GameObject.FindGameObjectWithTag("CheckUsers").GetComponent<RPC_CheckLoad>().colorFinishedUser)
+            {
+                isAllPlayersColorLoaded = true;
+            }
+        }
+        else
         {
             isAllPlayersColorLoaded = true;
         }
@@ -448,7 +745,7 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
 
     public void updateNeedle () {
-        desiredPosition = startPosiziton - endPosition;
+        desiredPosition = startPosiziton - endPosition; // 170 - -85
         float temp = RR.engineRPM / 10000;
         needle.transform.eulerAngles = new Vector3 (0, 0, (startPosiziton - temp * desiredPosition));
 
@@ -523,8 +820,15 @@ public class GameManager : MonoBehaviourPunCallbacks
         GL4.SetActive(false);
 
         isStarted = true;
-        ghostPlayer.StartGhost();
-        gRecorder.StartRecording();
+        RR.GameStartedFromGameManager();
+        
+        if(!isOnline) 
+        {
+            ghostPlayer.StartGhost();
+            gRecorder.StartRecording();
+        }
+        //ghostPlayer.StartGhost();
+        //gRecorder.StartRecording();
         
 
     }
@@ -537,74 +841,155 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         RR.isFinished = true;
         Finished = true;
-        savedData.data.ghostDatas.isGhost = false;
-        savedData.data.ghostDatas.isPlay = false;
+        if (!isOnline)
+        {
+            if(savedData.data.isRaining)
+            {
+                savedData.data.rainGhostDatas.isGhost = false;
+                savedData.data.rainGhostDatas.isPlay = false;
+            }
+            else
+            {
+                savedData.data.ghostDatas.isGhost = false;
+                savedData.data.ghostDatas.isPlay = false;
+            }
+            /*
+            savedData.data.ghostDatas.isGhost = false;
+            savedData.data.ghostDatas.isPlay = false;*/
+        }
+        //savedData.data.ghostDatas.isGhost = false;
+        //savedData.data.ghostDatas.isPlay = false;
+    }
+
+    public void SinglePlayerEnteredFinishLine()
+    {
+        finishGame();
     }
 
     public void FirstPlayerEntered(int actorNumber, string recordTime)
     {
         finishGame();
+        int winnerIndex;
+        int loserIndex;
+
+        //if (PhotonNetwork.PlayerList[actorNumber - 1].ToString() == PhotonNetwork.PlayerList[0].ToString())
+        if (PhotonNetwork.PlayerList[0].ActorNumber == actorNumber)
+        {
+            winnerIndex = 0;
+            loserIndex = 1;
+        }
+        else
+        {
+            winnerIndex = 1;
+            loserIndex = 0;
+        }
+        
+        /*
         winnerNickName.GetComponent<TextMeshProUGUI>().text = PhotonNetwork.PlayerList[actorNumber - 1].NickName;
         winnerRecord.GetComponent<TextMeshProUGUI>().text = recordTime;
         winnerCarImg.GetComponent<Image>().sprite = carImgArr[(int)PhotonNetwork.PlayerList[actorNumber - 1].CustomProperties["selectedCar"]];
         winInWin.text = $"{(int)PhotonNetwork.PlayerList[actorNumber - 1].CustomProperties["win"] + 1}승";
         loseInWin.text = $"{(int)PhotonNetwork.PlayerList[actorNumber - 1].CustomProperties["lose"]}패";
+        */
 
-        int winrateInWin;
-        int winrateInLose;
+        winnerNickName.GetComponent<TextMeshProUGUI>().text = PhotonNetwork.PlayerList[winnerIndex].NickName;
+        winnerRecord.GetComponent<TextMeshProUGUI>().text = recordTime;
+        winnerCarImg.GetComponent<Image>().sprite = carImgArr[(int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["selectedCar"]];
+        winInWin.text = $"{(int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["win"] + 1}승";
+        loseInWin.text = $"{(int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["lose"]}패";
 
-        
-       
-        
-        winrateInWin = ((int)PhotonNetwork.PlayerList[actorNumber - 1].CustomProperties["win"] + 1)
-            / ((int)PhotonNetwork.PlayerList[actorNumber - 1].CustomProperties["win"] + (int)PhotonNetwork.PlayerList[actorNumber - 1].CustomProperties["lose"] + 1);
-        
-        
-        rateInWin.text = $"승률{winrateInWin * 100}%";
+        double winrateInWin;
+        double winrateInLose;
 
-        int act = 0;
-        if (actorNumber == 1) act = 1;
+        if (PhotonNetwork.LocalPlayer.ActorNumber == actorNumber)
+        {
+            isWonTheGame = true;
+        }
+        else
+        {
+            isWonTheGame = false;
+        }
 
-        loserNickName.GetComponent<TextMeshProUGUI>().text = PhotonNetwork.PlayerList[act].NickName;
+
+        winrateInWin = GetPercentage((double)((int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["win"] + 1), 
+            (double)((int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["win"] + (int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["lose"] + 1), 1);
+
+        /*
+        winrateInWin = ((int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["win"] + 1)
+            / ((int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["win"] + (int)PhotonNetwork.PlayerList[winnerIndex].CustomProperties["lose"] + 1);
+        */
+        
+        rateInWin.text = $"승률{winrateInWin}%";
+
+        //int act = 0;
+        //if (actorNumber == 1) act = 1;
+
+        loserNickName.GetComponent<TextMeshProUGUI>().text = PhotonNetwork.PlayerList[loserIndex].NickName;
         loserRecord.GetComponent<TextMeshProUGUI>().text = "DNF";
-        loserCarImg.GetComponent<Image>().sprite = carImgArr[(int)PhotonNetwork.PlayerList[act].CustomProperties["selectedCar"]];
-        winInLose.text = $"{(int)PhotonNetwork.PlayerList[act].CustomProperties["win"]}승";
-        loseInLose.text = $"{(int)PhotonNetwork.PlayerList[act].CustomProperties["lose"] + 1}패";
+        loserCarImg.GetComponent<Image>().sprite = carImgArr[(int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["selectedCar"]];
+        winInLose.text = $"{(int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["win"]}승";
+        loseInLose.text = $"{(int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["lose"] + 1}패";
 
-        
-        
-        winrateInLose = (int)PhotonNetwork.PlayerList[act].CustomProperties["win"]
-            / ((int)PhotonNetwork.PlayerList[act].CustomProperties["win"] + (int)PhotonNetwork.PlayerList[act].CustomProperties["lose"] + 1);
-        
 
-        
-        rateInLose.text = $"승률{winrateInLose * 100}%";
+        /*
+        winrateInLose = (int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["win"]
+            / ((int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["win"] + (int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["lose"] + 1);
+        */
 
+        winrateInLose = GetPercentage((double)((int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["win"]),
+           (double)((int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["win"] + (int)PhotonNetwork.PlayerList[loserIndex].CustomProperties["lose"] + 1), 1);
+
+
+        rateInLose.text = $"승률{winrateInLose}%";
+        
 
         if (PhotonNetwork.LocalPlayer.ActorNumber == actorNumber)
         {
             resultPanel.transform.Find("recordPanel").transform.Find("winnerPanel").gameObject.GetComponent<Outline>().effectColor = Color.green;
             savedData.data.userWin++;
+            if(savedData.data.userLose == 0)
+            {
+                savedData.data.UserWinRate = 100f;
+            }
+            else
+            {
+                //savedData.data.UserWinRate = savedData.data.userWin / (savedData.data.userLose + savedData.data.userWin) * 100f;
+                savedData.data.UserWinRate = winrateInWin;
+            }
+            //savedData.data.UserWinRate = savedData.data.userWin / savedData.data.userLose;
+            Debug.Log(savedData.data.UserWinRate);
         }
         else
         {
             resultPanel.transform.Find("recordPanel").transform.Find("loserPanel").gameObject.GetComponent<Outline>().effectColor = Color.green;
             savedData.data.userLose++;
+            if(savedData.data.userLose == 0)
+            {
+                savedData.data.UserWinRate = 100f;
+            }
+            else
+            {
+                //savedData.data.UserWinRate = savedData.data.userWin / (savedData.data.userLose + savedData.data.userWin) * 100f;
+                savedData.data.UserWinRate = winrateInLose;
+            }
+            
         }
     }
 
     private void finishedTimer()
     {
-        if (isOnline)
+        if (isOnline && !allStop)
         {
             RaceUI.SetActive(false);
             SpeedUI.SetActive(false);
             finishCounter += Time.deltaTime;
+            PauseMusic();
             
 
             if (finishCounter >= 1 && finishSound == 0)
             {
-                startScript.finishedSoundPlay();
+                startScript.multiFinishedSoundPlay();
+                //startScript.finishedSoundPlay();
                 finishSound = 1;
                 //BestRecord.SetActive(true);
                 resultPanel.SetActive(true);
@@ -616,28 +1001,39 @@ public class GameManager : MonoBehaviourPunCallbacks
                 string timer2 = string.Format("{1:00}:{2:00}.{3:00}",
                     timespan2.Hours, timespan2.Minutes, timespan2.Seconds, timespan2.Milliseconds);
                 */
-                startScript.recordSoundPlay();
+                if (isWonTheGame)
+                {
+                    startScript.multiWinSoundPlay();
+                }
+                else
+                {
+                    startScript.multiLoseSoundPlay();
+                }
+                //startScript.recordSoundPlay();
                 recordSound = 1;
                 //BestRecordTime.text = timer2;
 
                 //ghostPlayer.DestroyGhostCar();
+                /*
                 if (!isOnline)
                 {
                     savedData.data.ghostDatas.currentClearedTime = m_TotalSeconds;
                     CompareGhostRecord();
-                }
+                }*/
             }
 
-            if (finishCounter >= 10)
+            if (finishCounter >= 12)
             {
-                if (isOnline)
-                {
-                    PhotonNetwork.LeaveRoom();
-                }
+               
+                allStop = true;
+                //GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<UserDataController>().OnClickSaveButton();
+                savedData.data.NeedUpdateDatas();
                 loadingSceneController.LoadScene("GarageScene");
+                PhotonNetwork.AutomaticallySyncScene = false;
+                PhotonNetwork.Disconnect();
             }
         }
-        else
+        else if(!isOnline && !allStop)
         {
 
 
@@ -662,27 +1058,41 @@ public class GameManager : MonoBehaviourPunCallbacks
                 BestRecordTime.text = timer2;
 
                 ghostPlayer.DestroyGhostCar();
-                if (!isOnline)
+                if (savedData.data.isRaining)
+                {
+                    savedData.data.rainGhostDatas.currentClearedTime = m_TotalSeconds;
+                    
+                }
+                else
                 {
                     savedData.data.ghostDatas.currentClearedTime = m_TotalSeconds;
-                    CompareGhostRecord();
                 }
+                CompareGhostRecord();
             }
 
-            if (finishCounter >= 6)
+            if (finishCounter >= 8)
             {
-                if (isOnline)
-                {
-                    PhotonNetwork.LeaveRoom();
-                }
+                allStop = true;
+                savedData.data.NeedUpdateDatas();
                 loadingSceneController.LoadScene("GarageScene");
+                //PhotonNetwork.AutomaticallySyncScene = false;
+                PhotonNetwork.Disconnect();
+                //loadingSceneController.LoadScene("GarageScene");
             }
         }
 
     }
     public void testFinish()
     {
-        lpM.TestFinish();
+        if(isOnline)
+        {
+            lpM.TestFinish();
+        }
+        else
+        {
+            SinglePlayerEnteredFinishLine();
+        }
+       // lpM.TestFinish();
     }
     public void resetCar()
     {
@@ -768,9 +1178,42 @@ public class GameManager : MonoBehaviourPunCallbacks
     }*/
     public void setBanner()
     {
-        TimeAttackBanner.SetActive(true);
-        timaAttackBanner = TimeAttackBanner.GetComponent<RectTransform>();
-        if( selectedCarNum == 0)
+        if (isOnline)
+        {
+            TimeAttackBanner.SetActive(false);
+            OtherInfoBanner.SetActive(true);
+            otherBanner = OtherInfoBanner.GetComponent<RectTransform>();
+            if((int)PhotonNetwork.PlayerListOthers[0].CustomProperties["selectedCar"] == 0)
+            {
+                otherImage.sprite = carImgArr[0];
+                otherLogo.sprite = carLogoArr[0];
+                otherBrand.text = "TOYOTA";
+                otherCar.text = "GR Supra";
+            }
+            else if((int)PhotonNetwork.PlayerListOthers[0].CustomProperties["selectedCar"] == 1)
+            {
+                otherImage.sprite = carImgArr[1];
+                otherLogo.sprite = carLogoArr[1];
+                otherBrand.text = "PORSCHE";
+                otherCar.text = "718 Cayman GTS";
+            }
+            else if ((int)PhotonNetwork.PlayerListOthers[0].CustomProperties["selectedCar"] == 2)
+            {
+                otherImage.sprite = carImgArr[2];
+                otherLogo.sprite = carLogoArr[2];
+                otherBrand.text = "BUGATTI";
+                otherCar.text = "CHIRON";
+            }
+        }
+        else
+        {
+            TimeAttackBanner.SetActive(true);
+            OtherInfoBanner.SetActive(false);
+            timaAttackBanner = TimeAttackBanner.GetComponent<RectTransform>();
+        }
+
+        
+        if (selectedCarNum == 0)
         {
             SupraBanner.gameObject.SetActive(true);
             SelectedBanner = SupraBanner;
@@ -788,6 +1231,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             SelectedBanner = ChironBanner;
             carInfoBanner = SelectedBanner.GetComponent<RectTransform>();
         }
+
         //carInfoBanner = SupraBanner.GetComponent<RectTransform>();
     }
 
@@ -815,8 +1259,18 @@ public class GameManager : MonoBehaviourPunCallbacks
         {
             carInfoPosition = carInfoBanner.anchoredPosition.x;
         }
+
         carInfoBanner.anchoredPosition = new Vector2(carInfoPosition,0);
-        timaAttackBanner.anchoredPosition = new Vector2(-carInfoPosition, 344);
+
+        if(isOnline)
+        {
+            otherBanner.anchoredPosition = new Vector2(-carInfoPosition, 344);
+        }
+        else
+        {
+            timaAttackBanner.anchoredPosition = new Vector2(-carInfoPosition, 344);
+        }
+       
 
     }
 
@@ -879,10 +1333,39 @@ public class GameManager : MonoBehaviourPunCallbacks
     }
     public void CompareGhostRecord()
     {
+        if(savedData.data.isRaining)
+        {
+            if ((savedData.data.rainGhostDatas.savedGhostRecordTime == -1f) || (savedData.data.rainGhostDatas.savedGhostRecordTime > m_TotalSeconds))
+            {
+                savedData.data.rainGhostDatas.UpdateSavedGhostDatas();
+            }
+
+            if((savedData.data.timeAttackNightTrackClearedTimeFloat == -1f) || (savedData.data.timeAttackNightTrackClearedTimeFloat > m_TotalSeconds))
+            {
+                savedData.data.timeAttackNightTrackClearedTimeFloat = m_TotalSeconds;
+                savedData.data.timeAttackNightTrackClearedDate = DateTime.Now.ToString(("yyyy-MM-dd"));
+                savedData.data.timeAttackNightTrackClearedCar = savedData.data.currentCar;
+            }
+        }
+        else
+        {
+            if ((savedData.data.ghostDatas.savedGhostRecordTime == -1f) || (savedData.data.ghostDatas.savedGhostRecordTime > m_TotalSeconds))
+            {
+                savedData.data.ghostDatas.UpdateSavedGhostDatas();
+            }
+
+            if ((savedData.data.timeAttackDayTrackClearedTimeFloat == -1f) || (savedData.data.timeAttackDayTrackClearedTimeFloat > m_TotalSeconds))
+            {
+                savedData.data.timeAttackDayTrackClearedTimeFloat = m_TotalSeconds;
+                savedData.data.timeAttackDayTrackClearedDate = DateTime.Now.ToString(("yyyy-MM-dd"));
+                savedData.data.timeAttackDayTrackClearedCar = savedData.data.currentCar;
+            }
+        }
+        /*
         if((savedData.data.ghostDatas.savedGhostRecordTime == -1f) || (savedData.data.ghostDatas.savedGhostRecordTime > m_TotalSeconds))
         {
             savedData.data.ghostDatas.UpdateSavedGhostDatas();
-        }
+        }*/
     }
 
     public void SetWings()
@@ -1036,6 +1519,14 @@ public class GameManager : MonoBehaviourPunCallbacks
                 (float)PhotonNetwork.PlayerList[1].CustomProperties["colorR"], (float)PhotonNetwork.PlayerList[1].CustomProperties["colorG"],
                         (float)PhotonNetwork.PlayerList[1].CustomProperties["colorB"]);
         }
+        else if (PhotonNetwork.PlayerList.Length == 1)
+        {
+            rpcOb = GameObject.FindGameObjectWithTag("CheckUsers");
+            PhotonView pv = rpcOb.GetComponent<PhotonView>();
+            pv.RPC("SetColorToServerSingle", RpcTarget.All, PhotonNetwork.PlayerList[0].ActorNumber, (int)PhotonNetwork.PlayerList[0].CustomProperties["selectedCar"],
+                (float)PhotonNetwork.PlayerList[0].CustomProperties["colorR"], (float)PhotonNetwork.PlayerList[0].CustomProperties["colorG"],
+                        (float)PhotonNetwork.PlayerList[0].CustomProperties["colorB"]);
+        }
         //readyFlag = false;
         PhotonView pv2 = rpcOb.GetComponent<PhotonView>();
         pv2.RPC("ColorLoaded", RpcTarget.All);
@@ -1083,6 +1574,50 @@ public class GameManager : MonoBehaviourPunCallbacks
     {
         musicName.text = bgmScript.ReturnMusicName();
     }
+
+    public void MenuCanvasOpen()
+    {
+        menuCanvas.SetActive(true);
+    }
+
+    public void MenuCanvasClose()
+    {
+        menuCanvas.SetActive(false);
+    }
+
+    public void ReturnToMainInGameClicked()
+    {
+        savedData.data.NeedUpdateDatas();
+        loadingSceneController.LoadScene("GarageScene");
+        //PhotonNetwork.AutomaticallySyncScene = false;
+        PhotonNetwork.Disconnect();
+    }
+
+    public void QuitInGameClicked()
+    {
+        savedData.data.NeedUpdateDatas();
+        //loadingSceneController.LoadScene("GarageScene");
+        //PhotonNetwork.AutomaticallySyncScene = false;
+        PhotonNetwork.Disconnect();
+        Application.Quit();
+    }
+
+    private double GetPercentage(double value, double total, int decimalplaces)
+    {
+        return System.Math.Round(value * 100 / total, decimalplaces);
+    }
+    /*
+    public void LeaveRoom()
+    {
+        PhotonNetwork.LeaveRoom();
+    }
+    
+    public override void OnLeftRoom()
+    {
+        loadingSceneController.LoadScene("GarageScene");
+        //PhotonNetwork.Disconnect();
+        base.OnLeftRoom();
+    }*/
 
     /*
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

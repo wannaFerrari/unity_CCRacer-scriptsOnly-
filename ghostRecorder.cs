@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ghostRecorder : MonoBehaviour
 {
-    public ghost ghost;
+    private ghost ghost;
     private float timer;
     private float timeValue;
     private bool start = false;
@@ -12,8 +12,28 @@ public class ghostRecorder : MonoBehaviour
     // Start is called before the first frame update
     private void Awake()
     {
-        ghost = savedData.data.ghostDatas;
+        if (savedData.data.isRaining)
+        {
+            ghost = savedData.data.rainGhostDatas;
+        }
+        else
+        {
+            ghost = savedData.data.ghostDatas;
+        }
+        //ghost = savedData.data.ghostDatas;
+        /*
+        if (ghost.isPlay)
+        {
+            ghost.ResetData();
+            ghost.currentCar = savedData.data.currentCar;
+            timeValue = 0;
+            timer = 0;
+        }*/
+    
+    }
 
+    private void Start()
+    {
         if (ghost.isPlay)
         {
             ghost.ResetData();
@@ -21,7 +41,6 @@ public class ghostRecorder : MonoBehaviour
             timeValue = 0;
             timer = 0;
         }
-    
     }
 
     // Update is called once per frame
@@ -46,5 +65,10 @@ public class ghostRecorder : MonoBehaviour
     public void StartRecording()
     {
         start = true;
+    }
+
+    public void StopRecording()
+    {
+        start = false;
     }
 }

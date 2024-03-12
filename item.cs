@@ -62,6 +62,7 @@ public class item
     public float downForce = 0f;
     public string description = "";
     public string korParts = "";
+    public int itemCode;
 
 
     public bool Use()

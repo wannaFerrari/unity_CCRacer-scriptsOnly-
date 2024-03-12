@@ -39,7 +39,7 @@ public class loadingSceneController : MonoBehaviour
             }
             else
             {
-                timer += Time.deltaTime*1.3f;
+                timer += Time.deltaTime*0.6f;
                 progressBar.fillAmount = Mathf.Lerp(0.1f, 1f, timer);
                 if(progressBar.fillAmount >= 1f)
                 {

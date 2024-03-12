@@ -48,7 +48,7 @@ public class inventory : MonoBehaviour
     {
         SlotCnt = 27;
         //Invoke("SetSlot", 1f);
-        Invoke("InitialMakeItem", 0.1f);
+        //Invoke("InitialMakeItem", 0.1f);
     }
     public void SetSlot()
     {
@@ -59,6 +59,7 @@ public class inventory : MonoBehaviour
         if (_item.itemType == ItemType.PowerUp)
         {
             PowerItems.Add(_item);
+            Debug.Log(_item.itemCode + "---" + _item.itemName);
         }
         else if(_item.itemType == ItemType.DrivingUP)
         {
@@ -95,7 +96,7 @@ public class inventory : MonoBehaviour
         onChangeItem.Invoke();
     }
 
-    private void InitialMakeItem()
+    public void InitialMakeItem()
     {
         if (savedData.data.ReturnInitialInventory())
         {
@@ -104,16 +105,19 @@ public class inventory : MonoBehaviour
 
             for (int i = 1; i < 28/*itemDatabase.instance.itemDB.Count*/; i++)
             {
+                itemDatabase.instance.itemDB[i].itemCode = i;
                 AddItem(itemDatabase.instance.itemDB[i]);
             }
             for (int j = 28; j < 46;j++)
             {
+                itemDatabase.instance.itemDB[j].itemCode = j;
                 AddItem(itemDatabase.instance.itemDB[j]);
-                //Debug.Log(itemDatabase.instance.itemDB[j].itemName);
+                Debug.Log(itemDatabase.instance.itemDB[j].itemCode);
             }
 
             for (int k=46; k< 50; k++)
             {
+                itemDatabase.instance.itemDB[k].itemCode = k;
                 AddItem(itemDatabase.instance.itemDB[k]);
             }
            
@@ -126,6 +130,7 @@ public class inventory : MonoBehaviour
     public void UpLoadInvenToSavedData()
     {
         savedData.data.ClearInvenList();
+        Debug.Log("inventory");
         for(int i = 0; i<PowerItems.Count; i++)
         {
             savedData.data.AddPowerInvenItems(PowerItems[i]);
@@ -142,6 +147,7 @@ public class inventory : MonoBehaviour
 
     public void DownLoadInvenToSavedData()
     {
+        //          itemDatabase.instance.itemDB[userData.includedPowerList[i].itemCode
         PowerItems.Clear();
         DriveItems.Clear();
         SpecialItems.Clear();
@@ -153,11 +159,12 @@ public class inventory : MonoBehaviour
         _item1 = savedData.data.ReturnPowerInvenItems().ToList();
         Debug.Log(_item1.Count);
         //Debug.Log(_item.Count);
-        for(int i = 0; i<_item1.Count; i++)
+        for (int i = 0; i < _item1.Count; i++)
         {
             //items.Add(_item[i]); Debug.Log(items[i].itemName + "ssssssssssssssssssssssssss");
-            AddItem(_item1[i]);
-            Debug.Log(_item1[i]);
+            //AddItem(_item1[i]);
+            AddItem(itemDatabase.instance.itemDB[_item1[i].itemCode]);
+            //Debug.Log("inven" + _item1[i].itemName);
             /*if (onChangeItem != null)
             {
                 onChangeItem.Invoke();
@@ -169,13 +176,15 @@ public class inventory : MonoBehaviour
         for (int i = 0; i < _item2.Count; i++)
         {
             //Debug.Log(_item2[i].itemName);
-            AddItem(_item2[i]);
+            //AddItem(_item2[i]);
+            AddItem(itemDatabase.instance.itemDB[_item2[i].itemCode]);
         }
         //_item.Clear();
         _item3 = savedData.data.ReturnSpecialInvenItems().ToList();
         for (int i = 0; i < _item3.Count; i++)
         {
-            AddItem(_item3[i]);
+            //AddItem(_item3[i]);
+            AddItem(itemDatabase.instance.itemDB[_item3[i].itemCode]);
         }
         onChangeItem.Invoke();
 

@@ -11,6 +11,8 @@ public class loadingSceneBackground : MonoBehaviour
     public GameObject tip2;
     public GameObject tip3;
 
+    public GameObject[] tips;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -19,20 +21,9 @@ public class loadingSceneBackground : MonoBehaviour
   
     private void randomImage()
     {
-        int tip = Random.Range(0, 3);
-        if (tip == 0)
-        {
-            tip1.SetActive(true);
-        }
-        else if (tip == 1)
-        {
-            tip2.SetActive(true);
-        }
-        else
-        {
-            tip3.SetActive(true);
+        int tip = Random.Range(0, tips.Length);
+        tips[tip].SetActive(true);
 
-        }
         int index = Random.Range(0, sprites.Length);
         Sprite select = sprites[index];
         image.sprite = select;

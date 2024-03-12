@@ -20,7 +20,7 @@ public class controller : MonoBehaviourPun
     public int BrakePowerValue;
 
     public bool isOnline = true;
-
+    public bool gameStarted = false;
 
     [HideInInspector]public int gearNum = 1;
     [HideInInspector] public bool playPauseSmoke = false;
@@ -238,6 +238,12 @@ public class controller : MonoBehaviourPun
                 GetComponent<cameraController>().enabled = false;
             }*/
         }
+        if (savedData.data.isRaining)
+        {
+            itemGrip -= 300;
+            itemBrake -= 500;
+            itemAngle += 1;
+        }
     }
 
     private void Update() 
@@ -298,7 +304,7 @@ public class controller : MonoBehaviourPun
     private void calculateEnginePower(){
 
         wheelRPM();
-
+        
             if (vertical != 0 ){
             rigidbody.drag = 0.005f; 
             }
@@ -312,21 +318,26 @@ public class controller : MonoBehaviourPun
         }
         else
         {
-            totalPower = 3.6f * (enginePower.Evaluate(engineRPM) + itemTorque) * (vertical);
+            //totalPower = 3.6f * (enginePower.Evaluate(engineRPM) + itemTorque) * (vertical);
+            totalPower =   (gears[gearNum] + 1.5f) * (enginePower.Evaluate(engineRPM) + itemTorque) * (vertical);
         }
         
 
 
         float velocity  = 0.0f;
+        /*if(engineRPM >= maxRPM && ((gearNum + 1) == gears.Length))
+        {
+            engineRPM = Mathf.SmoothDamp(engineRPM, engineRPM + (Mathf.Abs(wheelsRPM) * 3.6f * (gears[gearNum])), ref velocity, smoothTime);
+        }*/
         if (engineRPM >= maxRPM || flag ){
             engineRPM = Mathf.SmoothDamp(engineRPM, maxRPM - 500, ref velocity, 0.02f);
 
             flag = (engineRPM >= maxRPM - 450)?  true : false;
-            test = (lastValue > engineRPM) ? true : false;
+            //test = (lastValue > engineRPM) ? true : false;
         }
         else { 
             engineRPM = Mathf.SmoothDamp(engineRPM,1000 + (Mathf.Abs(wheelsRPM) * 3.6f * (gears[gearNum])), ref velocity , smoothTime);
-            test = false;
+            //test = false;
         }
         if (engineRPM >= maxRPM + 1000) engineRPM = maxRPM + 1000; // clamp at max
         moveVehicle();
@@ -390,29 +401,34 @@ public class controller : MonoBehaviourPun
 
         brakeVehicle();
 
-        for (int i = 0; i < wheels.Length; i++)
+        if (gameStarted)
         {
-            if ((KPH > 380 + (itemTorque/2)) || (wheelsRPM <= 0 && KPH > 97))
+
+
+
+            for (int i = 0; i < wheels.Length; i++)
             {
-                wheels[i].motorTorque = 0;
-                wheels[i].brakeTorque = brakPower;
+                if ((KPH > 380 + (itemTorque / 2)) || (wheelsRPM <= 0 && KPH > 97))
+                {
+                    wheels[i].motorTorque = 0;
+                    wheels[i].brakeTorque = brakPower;
+                }
+                else
+                {
+                    wheels[i].motorTorque = totalPower / 4;
+                    wheels[i].brakeTorque = brakPower;
+                }
             }
-            else
-            {
-                wheels[i].motorTorque = totalPower / 4;
-                wheels[i].brakeTorque = brakPower;
-            }
+
+            KPH = rigidbody.velocity.magnitude * 3.6f; //속도 계산 공식,   3.6 대신 2.237 곱하면 mph
         }
-
-        KPH = rigidbody.velocity.magnitude * 3.6f; //속도 계산 공식,   3.6 대신 2.237 곱하면 mph
-
 
     }
 
     private void brakeVehicle(){
 
         if (vertical < 0){
-            brakPower = (KPH >= 100) ? (2500 + itemBrake) : 1000;
+            brakPower = (KPH >= 100) ? (1800 + itemBrake) : 1000;
             if(wheelsRPM <= 0)
             {
                 brakPower = 0;
@@ -1078,6 +1094,11 @@ public class controller : MonoBehaviourPun
         {
             return false;
         }*/
+    }
+
+    public void GameStartedFromGameManager()
+    {
+        gameStarted = true;
     }
 
 }

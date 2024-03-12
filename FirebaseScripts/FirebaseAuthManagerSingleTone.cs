@@ -29,6 +29,8 @@ public class FirebaseAuthManagerSingleTone
 
     public Action<bool> LoginState;
 
+    public Action<bool> loginFailed;
+
     public void Init()
     {
         auth = FirebaseAuth.DefaultInstance;
@@ -57,6 +59,7 @@ public class FirebaseAuthManagerSingleTone
             if(signed)
             {
                 Debug.Log("로그인");
+                loginFailed?.Invoke(false);
                 LoginState?.Invoke(true);
             }
         }
@@ -93,7 +96,11 @@ public class FirebaseAuthManagerSingleTone
             }
             if (task.IsFaulted)
             {
-                //Debug.LogError("로그인 실패");
+                Debug.LogError("로그인 실패");
+                loginFailed?.Invoke(true);
+                //loginFailed = true;
+                //LoginSystem g = GameObject.FindGameObjectWithTag("LoginAndData").GetComponent<LoginSystem>();
+                //g.nonono();
                 return;
             }
 
@@ -119,6 +126,8 @@ public class FirebaseAuthManagerSingleTone
     {
         return UserId;
     }
+
+  
 
 
 
