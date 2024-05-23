@@ -535,6 +535,9 @@ public class controller : MonoBehaviourPun
         float driftSmothFactor = 0.7f * Time.deltaTime;
 
 		if(IM.handbrake){
+
+            //////
+            /*
             sidewaysFriction = wheels[0].sidewaysFriction;
             forwardFriction = wheels[0].forwardFriction;
 
@@ -554,7 +557,28 @@ public class controller : MonoBehaviourPun
                 wheels [i].forwardFriction = forwardFriction;
             }
             rigidbody.AddForce(transform.forward * (KPH / 400) * 1000 );
-		}
+            */
+            forwardFriction = wheels[0].forwardFriction;
+            sidewaysFriction = wheels[0].sidewaysFriction;
+
+            forwardFriction.extremumValue = forwardFriction.asymptoteValue = sidewaysFriction.extremumValue = sidewaysFriction.asymptoteValue = 1f;
+               // ((KPH * handBrakeFrictionMultiplier) / 300) + (1.1f + (itemGrip * 0.001f));
+
+            for (int i = 0; i < 4; i++)
+            {
+                ////////////////
+                //wheels[i].forwardFriction = forwardFriction;
+                //wheels[i].sidewaysFriction = sidewaysFriction;
+
+            }
+            for (int i = 2; i < 4; i++)
+            {
+                wheels[i].brakeTorque = 100000;
+                //wheels[i].sidewaysFriction = sidewaysFriction;
+                //wheels[i].forwardFriction = forwardFriction;
+                //wheels[i].sidewaysFriction = sidewaysFriction;
+            }
+        }
             //executed when handbrake is being held
         else{
 
