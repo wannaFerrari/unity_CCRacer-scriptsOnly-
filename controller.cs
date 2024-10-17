@@ -465,8 +465,9 @@ public class controller : MonoBehaviourPun
     private void steerVehicle(){
 
 
-        //acerman steering formula
+        //ackermann steering formula
 		//steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * horizontalInput;
+
          
         if (horizontal > 0 ) {
             //rear tracks size is set to 1.5f       wheel base has been set to 2.55f
@@ -487,6 +488,40 @@ public class controller : MonoBehaviourPun
             wheels[0].steerAngle =0;
             wheels[1].steerAngle =0;
         }
+
+
+        // No Ackermann
+        /*
+        if (horizontal > 0)
+        {
+            //rear tracks size is set to 1.5f       wheel base has been set to 2.55f
+            //wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * horizontal;
+            //wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * horizontal;
+            //wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + (itemAngle * 0.1f)) / (radius + (1.5f / 2))) * horizontal;
+            //wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + itemAngle * 0.1f) / (radius - (1.5f / 2))) * horizontal;
+
+            wheels[0].steerAngle = 20f * horizontal;
+            wheels[1].steerAngle = 20f * horizontal;
+            //Debug.Log(wheels[0].steerAngle + "---" + wheels[1].steerAngle);
+            //                                         (앞바퀴 뒷바퀴 사이 거리) / (선회중심점 + (양바퀴 사이거리 / 2))
+        }
+        else if (horizontal < 0)
+        {
+            //wheels[0].steerAngle =  Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius - (1.5f / 2))) * horizontal;
+            //wheels[1].steerAngle =  Mathf.Rad2Deg * Mathf.Atan(2.55f / (radius + (1.5f / 2))) * horizontal;
+            //wheels[0].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + itemAngle * 0.1f) / (radius - (1.5f / 2))) * horizontal;
+            //wheels[1].steerAngle = Mathf.Rad2Deg * Mathf.Atan((2.55f + itemAngle * 0.1f) / (radius + (1.5f / 2))) * horizontal;
+
+            wheels[0].steerAngle = 20f * horizontal;
+            wheels[1].steerAngle = 20f * horizontal;
+            //Debug.Log(wheels[0].steerAngle + "---" + wheels[1].steerAngle);
+
+        }
+        else
+        {
+            wheels[0].steerAngle = 0;
+            wheels[1].steerAngle = 0;
+        }*/
 
     }
 

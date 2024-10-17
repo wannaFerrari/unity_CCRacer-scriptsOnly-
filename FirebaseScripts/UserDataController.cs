@@ -48,6 +48,9 @@ public class UserData
     public string timeAttackDayTrackClearedDate;
     public string timeAttackNightTrackClearedDate;
 
+    public ghost dayGhostData;
+    public ghost rainGhostData;
+
     /*
     public UserData(string userNickName, int userWin, int userLose, float userWinRate)
     {
@@ -259,6 +262,7 @@ public class UserDataController : MonoBehaviour
                 userWin = userData.userWin;
                 userLose = userData.userLose;
                 userWinRate = userData.userWinRate;
+                Debug.Log("받아온 고스트"+userData.dayGhostData.savedGhostRecordTime);
                // text.text = dataString;
                // text.gameObject.SetActive(false);
                 //text.gameObject.SetActive(true);
@@ -345,6 +349,9 @@ public class UserDataController : MonoBehaviour
         userData.timeAttackDayTrackClearedDate = savedData.data.timeAttackDayTrackClearedDate;
         userData.timeAttackNightTrackClearedDate = savedData.data.timeAttackNightTrackClearedDate;
 
+        userData.dayGhostData = savedData.data.ghostDatas;
+        userData.rainGhostData = savedData.data.rainGhostDatas;
+
         savedData.data.DataUpdateCompleted();
         
 
@@ -393,6 +400,10 @@ public class UserDataController : MonoBehaviour
         savedData.data.timeAttackNightTrackClearedCar = userData.timeAttackNightTrackClearedCar;
         savedData.data.timeAttackDayTrackClearedDate = userData.timeAttackDayTrackClearedDate;
         savedData.data.timeAttackNightTrackClearedDate = userData.timeAttackNightTrackClearedDate;
+
+        savedData.data.ghostDatas = userData.dayGhostData;
+        savedData.data.rainGhostDatas = userData.rainGhostData;
+        Debug.Log("고스트데이터 로드" + userData.dayGhostData.savedGhostRecordTime);
 
 
 
